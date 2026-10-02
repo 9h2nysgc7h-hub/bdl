@@ -30,8 +30,8 @@ li{margin-bottom:6px}
 <div class="paso"><b>SQL Editor → New query</b> → pegá <b>todo</b> el contenido de <code>schema.sql</code> → Run.</div>
 <div class="paso"><b>Después, otra query nueva</b> → pegá <b>todo</b> el contenido de <code>seed.sql</code> → Run. Esto carga los 11 módulos y las 83 lecciones reales, sin video todavía.</div>
 
-<h2>3 · Activar logins sin confirmación por mail</h2>
-<div class="paso">Como los accesos los das vos a mano (no hay registro público), cuando crees cada usuario en el paso 5 tildá <b>"Auto Confirm User"</b> — así entra directo con la contraseña que le diste, sin tener que click-ear un mail de confirmación.</div>
+<h2>3 · Activar registro sin confirmación por mail</h2>
+<div class="paso">Cualquiera puede crear su cuenta solo, desde el botón "Crear cuenta" del login — por eso conviene sacarle la confirmación por mail para que no se trabe en ese paso. <b>Authentication → Providers → Email → apagá "Confirm email"</b>. Igual nadie entra a ver contenido hasta que vos (o un admin) lo apruebes desde el panel — la confirmación por mail no es el filtro real, la aprobación sí.</div>
 
 <h2>4 · Conectar el archivo con tu proyecto</h2>
 <div class="paso"><b>Project Settings → API</b> → copiá <b>Project URL</b> y <b>anon public key</b>. Abrí <code>index.html</code>, buscá las líneas <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> cerca del principio del <code>&lt;script&gt;</code>, y pegalos ahí.</div>
@@ -45,8 +45,9 @@ li{margin-bottom:6px}
 <h2>6 · Subir a Vercel</h2>
 <div class="paso">Mismo flujo que ya conocés del CRM: creás el proyecto en Vercel y subís la carpeta <code>Plataforma BDL</code> (con el <code>index.html</code> ya configurado). Te da una URL tipo <code>bdl-plataforma.vercel.app</code>.</div>
 
-<h2>7 · Dar de alta a cada alumno</h2>
-<div class="paso"><b>Authentication → Add user</b> (con "Auto Confirm User" tildado) con el email y una contraseña provisoria que le pasás vos. El perfil se crea solo, arranca en Semana 0 (la única abierta por defecto).</div>
+<h2>7 · Los alumnos se registran solos — vos los aprobás</h2>
+<div class="paso">Cada alumno entra a tu URL, click en <b>"¿No tenés cuenta? Creala"</b>, pone su nombre y apellido, email y contraseña. Queda en una pantalla de "pendiente de aprobación" hasta que entrás a <b>Admin → Miembros pendientes de aprobación</b> y le das <b>Aprobar</b>. Recién ahí puede ver el contenido, arrancando en Semana 0.</div>
+<div class="paso">Si preferís seguir creando vos los accesos a mano en algún caso puntual, podés — <b>Authentication → Add user</b> (con "Auto Confirm User" tildado) y después aprobarlo igual desde Miembros, porque arranca sin aprobar por default.</div>
 
 <h2>8 · Cargar cada video a medida que lo grabás</h2>
 <div class="paso">Subís el video a YouTube como <b>No listado</b> (no público, no aparece en búsquedas — solo entra quien tiene el link). Copiás el ID de la URL: en <code>youtube.com/watch?v=dQw4w9WgXcQ</code> el ID es <code>dQw4w9WgXcQ</code>. Entrás a la plataforma logueado como founder → <b>Admin</b> → pegás el ID en la fila de esa lección → Guardar. Aparece al toque para todos los alumnos que ya tengan ese módulo desbloqueado.</div>
@@ -58,7 +59,13 @@ li{margin-bottom:6px}
 <h2>Desbloqueo semanal — es manual, lo hacés vos</h2>
 <p>Cada alumno arranca viendo solo la Semana 0. Cuando termina una semana y su entregable, toca <b>"Avisar que terminé"</b> dentro de la plataforma — vos ves ese pedido apenas entrás a <b>Admin</b>, en la sección "Pedidos de desbloqueo", con un botón para desbloquearle la semana siguiente. También podés adelantar o corregir la semana de cualquiera a mano, sin esperar su pedido, desde la tabla de Alumnos en el mismo panel.</p>
 
-<h2>Si ya tenías el proyecto armado antes de este cambio</h2>
-<div class="paso">Corré <code>migracion-desbloqueo-manual.sql</code> en el SQL Editor (una sola vez) — agrega las columnas nuevas sin tocar nada de lo que ya cargaste. No hace falta volver a correr <code>seed.sql</code>.</div>
+<h2>Roles: founder y admin</h2>
+<p>Además de vos (founder), podés darle el panel Admin a alguien más — en <b>Miembros</b>, en la fila de esa persona, cambiale el rol a <code>admin</code> y Guardar. Puede aprobar miembros, desbloquear semanas y cargar videos igual que vos.</p>
+
+<h2>Si ya tenías el proyecto armado antes de estos cambios</h2>
+<div class="paso">Corré, en este orden, en el SQL Editor (una sola vez cada uno):
+<br>1. <code>migracion-desbloqueo-manual.sql</code> — agrega el desbloqueo manual por semana.
+<br>2. <code>migracion-registro-aprobacion.sql</code> — agrega el registro público y la aprobación de miembros.
+<br>Ninguno de los dos toca lo que ya tenés cargado, y no hace falta volver a correr <code>seed.sql</code>.</div>
 
 </div>
