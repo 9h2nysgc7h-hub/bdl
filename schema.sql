@@ -146,6 +146,16 @@ create table if not exists progreso (
   primary key (alumno_id, leccion_id)
 );
 
+-- ---------- ENTREGABLES: lo que el alumno deja al avisar que terminó ----------
+create table if not exists entregas (
+  id bigint generated always as identity primary key,
+  alumno_id uuid not null references profiles(id) on delete cascade,
+  modulo_numero int not null,
+  contenido text not null,
+  created_at timestamptz not null default now(),
+  unique (alumno_id, modulo_numero)
+);
+
 -- ---------- HISTORIAL: cuándo empezó y terminó cada semana ----------
 -- Se registra solo con un trigger — ver registrar_avance_semana más abajo.
 create table if not exists avance_semanas (
@@ -185,6 +195,7 @@ alter table modulos enable row level security;
 alter table lecciones enable row level security;
 alter table recursos enable row level security;
 alter table progreso enable row level security;
+alter table entregas enable row level security;
 alter table avance_semanas enable row level security;
 alter table diagnostico enable row level security;
 alter table cierre enable row level security;
@@ -211,6 +222,13 @@ create policy "staff edita recursos" on recursos for all
 
 create policy "ver progreso" on progreso for select
   using (auth.uid() = alumno_id or es_staff());
+
+create policy "ver propia entrega" on entregas for select
+  using (alumno_id = auth.uid() or es_staff());
+create policy "cargar propia entrega" on entregas for insert
+  with check (alumno_id = auth.uid());
+create policy "editar propia entrega" on entregas for update
+  using (alumno_id = auth.uid());
 
 create policy "ver avance" on avance_semanas for select
   using (alumno_id = auth.uid() or es_staff());

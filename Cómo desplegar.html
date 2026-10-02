@@ -59,6 +59,9 @@ li{margin-bottom:6px}
 <h2>Desbloqueo semanal — es manual, lo hacés vos</h2>
 <p>Cada alumno arranca viendo solo la Semana 0. Cuando termina una semana y su entregable, toca <b>"Avisar que terminé"</b> dentro de la plataforma — vos ves ese pedido apenas entrás a <b>Admin</b>, en la sección "Pedidos de desbloqueo", con un botón para desbloquearle la semana siguiente. También podés adelantar o corregir la semana de cualquiera a mano, sin esperar su pedido, desde la tabla de Alumnos en el mismo panel.</p>
 
+<h2>Botón de WhatsApp</h2>
+<p>Queda fijo abajo a la derecha en toda la plataforma, incluido el login. El número está hardcodeado en <code>index.html</code> (buscá <code>wa-float</code>) — si en algún momento cambia, se edita ahí.</p>
+
 <h2>Roles: founder y admin</h2>
 <p>Además de vos (founder), podés darle el panel Admin a alguien más — en <b>Miembros</b>, en la fila de esa persona, cambiale el rol a <code>admin</code> y Guardar. Puede aprobar miembros, desbloquear semanas y cargar videos igual que vos.</p>
 
@@ -83,6 +86,7 @@ li{margin-bottom:6px}
 <br>4. <code>migracion-miniaturas.sql</code> — agrega las miniaturas propias.
 <br>5. <code>migracion-avisos-y-resumen.sql</code> — agrega antigüedad de pedidos, último acceso y los avisos dentro de la app.
 <br>6. <code>migracion-historial-semanas.sql</code> — agrega el historial de cuándo empezó y terminó cada semana por alumno.
+<br>7. <code>migracion-entregables.sql</code> — agrega el entregable real que deja el alumno al avisar que terminó.
 <br>Ninguno toca lo que ya tenés cargado, y no hace falta volver a correr <code>seed.sql</code>.</div>
 
 </div>

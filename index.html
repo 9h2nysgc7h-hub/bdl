@@ -54,6 +54,7 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 .login-box h1{font-family:'Archivo Black';font-size:19px;font-weight:400;text-align:center;margin:0 0 6px;text-wrap:balance}
 .login-box p.sub{font-size:13px;color:var(--muted);text-align:center;margin:0 0 30px;line-height:1.5}
 .err{color:var(--warn);font-size:13px;margin-top:10px}
+.info{color:var(--gold-soft);font-size:13px;margin-top:10px;line-height:1.5}
 
 /* ---- tabs de semana ---- */
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:26px;scrollbar-width:none}
@@ -102,6 +103,8 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 .card-body .sub{font-size:10.5px;color:var(--faint);letter-spacing:.03em;margin:0}
 
 .desbloqueo-box{margin-top:14px;background:var(--bg-2);border:1px dashed var(--gold-deep);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.desbloqueo-box.con-form{flex-direction:column;align-items:stretch}
+.desbloqueo-box textarea{width:100%;min-height:72px;margin:10px 0;resize:vertical;font-family:inherit}
 .desbloqueo-box p{margin:0;font-size:13px;color:var(--muted)}
 .desbloqueo-box.espera{border-style:solid;border-color:var(--line)}
 
@@ -156,7 +159,13 @@ table.admin th{text-align:left;color:var(--faint);font-size:10.5px;text-transfor
 table.admin td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 table.admin input{padding:6px 8px;font-size:12.5px}
 .tag-rol{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bg-2);color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+tr.riesgo td{background:rgba(224,138,110,.08)}
+tr.riesgo td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1A1406;padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:600;z-index:50;box-shadow:0 10px 30px -10px rgba(var(--shadow),.6)}
+.wa-float{position:fixed;right:20px;bottom:20px;z-index:40;display:flex;align-items:center;gap:8px;background:#25D366;color:#06130B;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13.5px;box-shadow:0 12px 28px -10px rgba(0,0,0,.6);transition:transform .15s,background .15s}
+.wa-float:hover{background:#2EE578;transform:translateY(-2px)}
+.wa-float svg{width:19px;height:19px;flex:none}
+@media (max-width:520px){.wa-float span{display:none}.wa-float{padding:13px;border-radius:50%}}
 
 .config-warn{max-width:560px;margin:14vh auto;background:var(--card);border:1px solid var(--gold-deep);border-radius:10px;padding:26px 30px;font-size:14px;line-height:1.6}
 .config-warn code{background:var(--bg-2);padding:2px 6px;border-radius:4px;font-size:12.5px}
@@ -195,6 +204,11 @@ table.admin input{padding:6px 8px;font-size:12.5px}
 </div>
 
 <div id="toast" class="toast hidden"></div>
+
+<a id="wa-float" class="wa-float" href="https://wa.me/5493541548204?text=Hola!%20tengo%20una%20consulta%20sobre%20BDL" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.44 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 1.67c2.2 0 4.26.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.18 8.18 0 0 1-1.25-4.36c0-4.55 3.7-8.24 8.25-8.24zm-4.42 4.73c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.67 2.65 4.14 3.6 2.04.8 2.46.64 2.9.6.44-.04 1.43-.58 1.63-1.15.2-.56.2-1.04.14-1.15-.06-.1-.22-.16-.46-.28-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.17-.7-.62-1.18-1.39-1.32-1.63-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.32-.75-1.8-.2-.47-.4-.4-.54-.41z"/></svg>
+  <span>Escribime</span>
+</a>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -237,6 +251,7 @@ let state = {
   progreso: new Set(),   // ids de leccion completados
   diagnostico: null,
   cierre: null,
+  misEntregas: {},       // { modulo_numero: contenido }
 };
 
 const $ = (sel, root=document) => root.querySelector(sel);
@@ -257,6 +272,15 @@ function hace(fechaIso){
   if (dias <= 0) return 'hoy';
   if (dias === 1) return 'ayer';
   return `hace ${dias} días`;
+}
+
+const UMBRAL_RIESGO_DIAS = 15;
+function estaEnRiesgo(a, diasEtapa){
+  if (!a.aprobado) return false;
+  if (diasEtapa !== null && diasEtapa > UMBRAL_RIESGO_DIAS) return true;
+  if (!a.ultimo_acceso) return true;
+  const diasAcceso = Math.floor((Date.now() - new Date(a.ultimo_acceso).getTime()) / 86400000);
+  return diasAcceso > UMBRAL_RIESGO_DIAS;
 }
 
 // ---------- duración real desde YouTube ----------
@@ -305,12 +329,15 @@ async function cargarDatosBase(){
   state.recursos = recursos || [];
   state.progreso = new Set((progreso||[]).map(p => p.leccion_id));
 
-  const [{data: diag}, {data: cie}] = await Promise.all([
+  const [{data: diag}, {data: cie}, {data: entregas}] = await Promise.all([
     sb.from('diagnostico').select('*').eq('alumno_id', state.user.id).maybeSingle(),
     sb.from('cierre').select('*').eq('alumno_id', state.user.id).maybeSingle(),
+    sb.from('entregas').select('*').eq('alumno_id', state.user.id),
   ]);
   state.diagnostico = diag || null;
   state.cierre = cie || null;
+  state.misEntregas = {};
+  (entregas||[]).forEach(e => { state.misEntregas[e.modulo_numero] = e.contenido; });
 
   actualizarAnilloGlobal();
 }
@@ -358,27 +385,42 @@ function renderLogin(){
   $('#app').classList.add('hidden');
   removeLoginScreen();
   const isSignup = authMode === 'signup';
+  const isRecuperar = authMode === 'recuperar';
   document.body.insertAdjacentHTML('beforeend', `
     <div id="login-screen" class="login-box">
       <div class="crest">${CRESTSVG}</div>
-      <h1>Bastión De Líderes</h1>
-      <p class="sub">${isSignup ? 'Creá tu cuenta. Un admin la tiene que aprobar antes de que puedas entrar.' : 'Entrá con tu cuenta, o creá una nueva si todavía no tenés.'}</p>
+      <h1>${isRecuperar ? 'Recuperar contraseña' : 'Bastión De Líderes'}</h1>
+      <p class="sub">${isRecuperar ? 'Poné tu email y te mandamos un link para elegir una nueva.' : isSignup ? 'Creá tu cuenta. Un admin la tiene que aprobar antes de que puedas entrar.' : 'Entrá con tu cuenta, o creá una nueva si todavía no tenés.'}</p>
       ${isSignup ? `<div class="field"><label>Nombre y apellido</label><input id="su-nombre" type="text" autocomplete="name"></div>` : ''}
       <div class="field"><label>Email</label><input id="li-email" type="email" autocomplete="username"></div>
-      <div class="field"><label>Contraseña</label><input id="li-pass" type="password" autocomplete="${isSignup ? 'new-password' : 'current-password'}"></div>
-      <button class="primary" style="width:100%" id="li-submit">${isSignup ? 'Crear cuenta' : 'Entrar'}</button>
+      ${!isRecuperar ? `<div class="field"><label>Contraseña</label><input id="li-pass" type="password" autocomplete="${isSignup ? 'new-password' : 'current-password'}"></div>` : ''}
+      <button class="primary" style="width:100%" id="li-submit">${isRecuperar ? 'Enviar link' : isSignup ? 'Crear cuenta' : 'Entrar'}</button>
       <div class="err hidden" id="li-err"></div>
-      <p style="text-align:center;font-size:12.5px;color:var(--muted);margin:18px 0 0;cursor:pointer" id="li-toggle">${isSignup ? '¿Ya tenés cuenta? Entrá' : '¿No tenés cuenta? Creala'}</p>
+      <div class="info hidden" id="li-info"></div>
+      <p style="text-align:center;font-size:12.5px;color:var(--muted);margin:18px 0 0;cursor:pointer" id="li-toggle">${isRecuperar || isSignup ? '¿Ya tenés cuenta? Entrá' : '¿No tenés cuenta? Creala'}</p>
+      ${!isSignup && !isRecuperar ? `<p style="text-align:center;font-size:12px;color:var(--faint);margin:8px 0 0;cursor:pointer" id="li-forgot">¿Olvidaste tu contraseña?</p>` : ''}
     </div>
   `);
 
-  const mostrarErr = (msg) => { $('#li-err').textContent = msg; $('#li-err').classList.remove('hidden'); };
+  const mostrarErr = (msg) => { $('#li-info').classList.add('hidden'); $('#li-err').textContent = msg; $('#li-err').classList.remove('hidden'); };
+  const mostrarInfo = (msg) => { $('#li-err').classList.add('hidden'); $('#li-info').textContent = msg; $('#li-info').classList.remove('hidden'); };
 
-  $('#li-toggle').onclick = () => { authMode = isSignup ? 'login' : 'signup'; renderLogin(); };
+  $('#li-toggle').onclick = () => { authMode = (isRecuperar || isSignup) ? 'login' : 'signup'; renderLogin(); };
+  $('#li-forgot')?.addEventListener('click', () => { authMode = 'recuperar'; renderLogin(); });
 
   $('#li-submit').onclick = async () => {
     $('#li-err').classList.add('hidden');
+    $('#li-info').classList.add('hidden');
     const email = $('#li-email').value.trim();
+
+    if (isRecuperar){
+      if (!email) { mostrarErr('Poné tu email.'); return; }
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+      if (error) { mostrarErr('No pudimos enviar el link: ' + error.message); return; }
+      mostrarInfo('Listo — revisá tu mail y abrí el link para elegir una nueva contraseña.');
+      return;
+    }
+
     const password = $('#li-pass').value;
     if (isSignup){
       const nombre = $('#su-nombre').value.trim();
@@ -392,6 +434,30 @@ function renderLogin(){
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) { mostrarErr('No pudimos entrar: ' + error.message); return; }
     }
+  };
+}
+
+function renderNuevaContrasena(){
+  $('#app').classList.add('hidden');
+  removeLoginScreen();
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="login-screen" class="login-box">
+      <div class="crest">${CRESTSVG}</div>
+      <h1>Elegí tu nueva contraseña</h1>
+      <p class="sub">Escribila una sola vez y listo.</p>
+      <div class="field"><label>Contraseña nueva</label><input id="np-pass" type="password" autocomplete="new-password"></div>
+      <button class="primary" style="width:100%" id="np-submit">Guardar</button>
+      <div class="err hidden" id="np-err"></div>
+    </div>
+  `);
+  $('#np-submit').onclick = async () => {
+    const pass = $('#np-pass').value;
+    if (pass.length < 6) { $('#np-err').textContent = 'Mínimo 6 caracteres.'; $('#np-err').classList.remove('hidden'); return; }
+    const { error } = await sb.auth.updateUser({ password: pass });
+    if (error) { $('#np-err').textContent = error.message; $('#np-err').classList.remove('hidden'); return; }
+    authMode = 'login';
+    location.hash = '';
+    location.reload();
   };
 }
 
@@ -468,8 +534,16 @@ function renderDashboard(){
       </div>
       ${esActual && todasCompletas ? (
         state.profile.pidio_desbloqueo
-          ? `<div class="desbloqueo-box espera"><p>Ya le avisaste al founder — esperando que te desbloquee la Semana ${modulo.numero+1}.</p></div>`
-          : `<div class="desbloqueo-box"><p>Terminaste esta semana y el entregable. Avisale al founder para que te desbloquee la próxima.</p><button class="primary" id="btn-avisar">Avisar que terminé</button></div>`
+          ? `<div class="desbloqueo-box espera con-form">
+               <p style="margin:0">Ya le avisaste al founder — esperando que te desbloquee la Semana ${modulo.numero+1}.</p>
+               <p class="d" style="margin:10px 0 4px;font-size:12px;color:var(--faint)">Lo que mandaste:</p>
+               <p style="margin:0;font-size:13.5px;white-space:pre-wrap">${(state.misEntregas[modulo.numero]||'').replace(/</g,'&lt;')}</p>
+             </div>`
+          : `<div class="desbloqueo-box con-form">
+               <p style="margin:0">Terminaste esta semana. Antes de avisar, dejá acá tu entregable — un link a tu documento, o directamente escribí tu respuesta.</p>
+               <textarea id="entregable-texto" placeholder="Pegá un link, o escribí tu entregable acá...">${(state.misEntregas[modulo.numero]||'').replace(/</g,'&lt;')}</textarea>
+               <button class="primary" id="btn-avisar" data-modulo="${modulo.numero}" style="align-self:flex-start">Avisar que terminé</button>
+             </div>`
       ) : ''}
     </div>`;
   }
@@ -484,6 +558,11 @@ function renderDashboard(){
   });
   const btnAvisar = $('#btn-avisar');
   if (btnAvisar) btnAvisar.onclick = async () => {
+    const modNum = parseInt(btnAvisar.dataset.modulo);
+    const contenido = $('#entregable-texto').value.trim();
+    if (!contenido){ toast('Dejá tu entregable antes de avisar'); return; }
+    await sb.from('entregas').upsert({ alumno_id: state.user.id, modulo_numero: modNum, contenido }, { onConflict: 'alumno_id,modulo_numero' });
+    state.misEntregas[modNum] = contenido;
     const ahora = new Date().toISOString();
     await sb.from('profiles').update({ pidio_desbloqueo: true, pidio_desbloqueo_at: ahora }).eq('id', state.user.id);
     state.profile.pidio_desbloqueo = true;
@@ -790,16 +869,19 @@ function renderPerfil(){
 
 // ---------- datos compartidos de alumnos (Admin + Alumnos) ----------
 async function obtenerDatosAlumnos(){
-  const [{data: alumnos}, {data: todoProgreso}, {data: todoAvance}] = await Promise.all([
+  const [{data: alumnos}, {data: todoProgreso}, {data: todoAvance}, {data: todasEntregas}] = await Promise.all([
     sb.from('profiles').select('*').order('created_at'),
     sb.from('progreso').select('alumno_id'),
     sb.from('avance_semanas').select('*').order('modulo_numero'),
+    sb.from('entregas').select('*'),
   ]);
   const totalLec = state.lecciones.length;
   const conteo = {};
   (todoProgreso||[]).forEach(p => conteo[p.alumno_id] = (conteo[p.alumno_id]||0)+1);
   const avancePorAlumno = {};
   (todoAvance||[]).forEach(v => { (avancePorAlumno[v.alumno_id] ||= []).push(v); });
+  const entregaPorAlumnoModulo = {};
+  (todasEntregas||[]).forEach(e => { entregaPorAlumnoModulo[e.alumno_id+'_'+e.modulo_numero] = e.contenido; });
   const fechaCorta = (iso) => iso ? new Date(iso).toLocaleDateString('es-AR', { day:'numeric', month:'short' }) : '—';
   const diasEntre = (ini, fin) => Math.max(0, Math.round((new Date(fin||Date.now()) - new Date(ini)) / 86400000));
 
@@ -813,7 +895,7 @@ async function obtenerDatosAlumnos(){
   const porSemana = {};
   aprobados.forEach(a => { porSemana[a.modulo_actual] = (porSemana[a.modulo_actual]||0) + 1; });
 
-  return { alumnos: alumnos||[], totalLec, conteo, avancePorAlumno, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo, aprobados, avanceProm, porSemana };
+  return { alumnos: alumnos||[], totalLec, conteo, avancePorAlumno, entregaPorAlumnoModulo, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo, aprobados, avanceProm, porSemana };
 }
 
 function resumenHtml(d){
@@ -833,7 +915,7 @@ async function renderAdmin(){
   if (!esStaff(state.profile)){ location.hash = '#/'; return; }
 
   const d = await obtenerDatosAlumnos();
-  const { alumnos, totalLec, conteo, avancePorAlumno, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo } = d;
+  const { alumnos, totalLec, conteo, avancePorAlumno, entregaPorAlumnoModulo, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo } = d;
 
   let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Admin</h2>`;
 
@@ -851,16 +933,21 @@ async function renderAdmin(){
     : `<p class="d" style="margin:0">No hay nadie esperando aprobación.</p>`;
   html += `</div>`;
 
-  html += `<div class="box"><h3>Pedidos de desbloqueo</h3><p class="d">Miembros que avisaron que terminaron su semana actual y el entregable.</p>`;
+  html += `<div class="box"><h3>Pedidos de desbloqueo</h3><p class="d">Miembros que avisaron que terminaron su semana actual, con lo que dejaron de entregable.</p>`;
   html += pedidosDesbloqueo.length
-    ? `<table class="admin"><tr><th>Nombre</th><th>Semana actual</th><th>Esperando</th><th></th></tr>
-       ${pedidosDesbloqueo.map(a => `<tr>
-         <td>${a.nombre}</td>
-         <td class="mono">Semana ${a.modulo_actual}</td>
-         <td class="mono" style="${hace(a.pidio_desbloqueo_at).startsWith('hace') && parseInt(hace(a.pidio_desbloqueo_at))>2 ? 'color:var(--warn)' : ''}">${hace(a.pidio_desbloqueo_at)}</td>
-         <td><button class="primary" data-desbloquear="${a.id}" data-actual="${a.modulo_actual}">Desbloquear Semana ${a.modulo_actual+1}</button></td>
-       </tr>`).join('')}
-       </table>`
+    ? pedidosDesbloqueo.map(a => {
+        const entrega = entregaPorAlumnoModulo[a.id+'_'+a.modulo_actual];
+        return `<div class="recurso" style="align-items:stretch">
+          <div class="cont">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+              <p class="tit" style="margin:0">${a.nombre} <span class="mono" style="font-weight:400;color:var(--muted)">· Semana ${a.modulo_actual}</span></p>
+              <span class="mono" style="font-size:11px;color:var(--faint)">${hace(a.pidio_desbloqueo_at)}</span>
+            </div>
+            <p class="desc" style="white-space:pre-wrap;margin:0 0 12px">${entrega ? entrega.replace(/</g,'&lt;') : '<span style="color:var(--faint)">(no dejó entregable — cuenta vieja de antes de este cambio)</span>'}</p>
+            <button class="primary" data-desbloquear="${a.id}" data-actual="${a.modulo_actual}">Desbloquear Semana ${a.modulo_actual+1}</button>
+          </div>
+        </div>`;
+      }).join('')
     : `<p class="d" style="margin:0">No hay pedidos pendientes.</p>`;
   html += `</div>`;
 
@@ -877,7 +964,7 @@ async function renderAdmin(){
         <td>${a.nombre}</td><td class="mono">${a.email||'—'}</td>
         <td><span class="tag-rol">founder</span></td><td>—</td><td>—</td><td class="mono">${hace(a.ultimo_acceso)}</td><td>—</td><td></td><td>${conteo[a.id]||0}/${totalLec}</td><td></td>
       </tr>`;
-      return `<tr>
+      return `<tr class="${estaEnRiesgo(a, diasEtapa) ? 'riesgo' : ''}">
         <td>${a.nombre}</td>
         <td class="mono">${a.email||'—'}</td>
         <td><select id="rol-${a.id}"><option value="alumno" ${a.rol==='alumno'?'selected':''}>alumno</option><option value="admin" ${a.rol==='admin'?'selected':''}>admin</option></select></td>
@@ -1099,7 +1186,7 @@ async function renderAlumnos(){
   let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Alumnos</h2>`;
   html += resumenHtml(d);
 
-  html += `<div class="box"><h3>Todos los alumnos</h3><p class="d">${lista.length} en total. Para aprobar, desbloquear o cambiar roles, andá a Admin — acá es solo para ver todo junto.</p>
+  html += `<div class="box"><h3>Todos los alumnos</h3><p class="d">${lista.length} en total. En rojo, los que llevan más de ${UMBRAL_RIESGO_DIAS} días sin avanzar o sin entrar. Para aprobar, desbloquear o cambiar roles, andá a Admin — acá es solo para ver todo junto.</p>
     <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Estado</th><th>Semana</th><th>En esta semana</th><th>Último acceso</th><th>Progreso</th><th></th></tr>
     ${lista.map(a => {
       const avanceAlumno = avancePorAlumno[a.id] || [];
@@ -1108,7 +1195,7 @@ async function renderAlumnos(){
       const historialHtml = avanceAlumno.length
         ? avanceAlumno.map(v => `Semana ${v.modulo_numero}: empezó ${fechaCorta(v.iniciado_at)}${v.completado_at ? ` — terminó ${fechaCorta(v.completado_at)} (${diasEntre(v.iniciado_at, v.completado_at)} días)` : ` — en curso (${diasEntre(v.iniciado_at, null)} días)`}`).join('<br>')
         : 'Sin historial todavía.';
-      return `<tr>
+      return `<tr class="${estaEnRiesgo(a, diasEtapa) ? 'riesgo' : ''}">
         <td>${a.nombre}</td>
         <td class="mono">${a.email||'—'}</td>
         <td>${a.aprobado ? '<span class="tag-rol" style="color:var(--ok)">aprobado</span>' : '<span class="tag-rol" style="color:var(--warn)">pendiente</span>'}</td>
@@ -1131,6 +1218,10 @@ async function renderAlumnos(){
 
 // ---------- auth bootstrap ----------
 sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'PASSWORD_RECOVERY'){
+    renderNuevaContrasena();
+    return;
+  }
   if (session?.user){
     state.user = session.user;
     const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
