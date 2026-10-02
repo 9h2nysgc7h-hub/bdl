@@ -1,0 +1,82 @@
+<title>Miniatura</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:#0E1A24}
+.canvas{
+  position:relative;width:1280px;height:720px;
+  background:radial-gradient(ellipse 1000px 800px at 78% 30%, #1B2E42 0%, #101E2B 55%, #070D13 100%);
+  overflow:hidden;font-family:'Inter',Arial,sans-serif;
+}
+.ray{position:absolute;top:-160px;left:920px;width:10px;height:1100px;
+  background:linear-gradient(to bottom, rgba(228,199,102,.14) 0%, rgba(228,199,102,0) 78%);
+  transform-origin:top center;filter:blur(3px);mix-blend-mode:screen;}
+.r1{transform:rotate(-30deg);width:6px}
+.r2{transform:rotate(-15deg);width:14px}
+.r3{transform:rotate(2deg);width:8px}
+.r4{transform:rotate(18deg);width:16px}
+.r5{transform:rotate(33deg);width:7px}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse 1000px 700px at 50% 45%, transparent 40%, rgba(0,0,0,.6) 100%)}
+
+.crest{position:absolute;top:56px;left:64px;width:74px;z-index:3}
+
+.content{position:absolute;left:64px;top:0;bottom:0;width:760px;display:flex;flex-direction:column;justify-content:center;z-index:3}
+.badge{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'IBM Plex Mono',monospace;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+  color:#E4C766;margin:0 0 22px;
+}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:#C9A227}
+h1{
+  font-family:'Archivo Black',Arial,sans-serif;font-weight:400;
+  font-size:52px;line-height:1.12;color:#F4EEE4;max-width:680px;
+  text-wrap:balance;
+}
+h1 .hl{color:#D9A441}
+
+.footer{position:absolute;left:64px;bottom:44px;z-index:3;display:flex;align-items:center;gap:14px}
+.footer .line{width:34px;height:2px;background:#C9A227}
+.footer .wm{font-family:'Archivo Black';font-size:15px;color:#F4EEE4;letter-spacing:.02em}
+.footer .wm span{color:#C9A227}
+.footer .by{font-family:'IBM Plex Mono';font-size:11px;color:#7C8A98;letter-spacing:.08em;margin-left:4px}
+</style>
+
+<div class="canvas">
+  <div class="ray r1"></div><div class="ray r2"></div><div class="ray r3"></div><div class="ray r4"></div><div class="ray r5"></div>
+  <div class="vignette"></div>
+
+  <svg class="crest" viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#E4C766"/><stop offset="100%" stop-color="#8B6A1B"/>
+      </linearGradient>
+    </defs>
+    <path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g1)"/>
+    <path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z"
+          fill="#132232" stroke="url(#g1)" stroke-width="5"/>
+    <text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F4EEE4">BDL</text>
+  </svg>
+
+  <div class="content">
+    <p class="badge"><span class="dot"></span>__MODULE__ · Video __VIDEONUM__</p>
+    <h1>__TITLE__</h1>
+  </div>
+
+  <div class="footer">
+    <div class="line"></div>
+    <p class="wm">BDL <span>—</span> Bastión De Líderes</p>
+    <p class="by">BY NAVE</p>
+  </div>
+</div>
+<script>
+  var h1 = document.querySelector('h1');
+  var len = h1.textContent.length;
+  var size = 52;
+  if(len > 70) size = 34;
+  else if(len > 55) size = 38;
+  else if(len > 42) size = 44;
+  else if(len > 30) size = 48;
+  h1.style.fontSize = size + 'px';
+</script>
+

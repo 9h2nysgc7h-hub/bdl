@@ -1,0 +1,306 @@
+<title>Estructura BDL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root{
+  --bg:#0E1A24;
+  --card:#132232;
+  --card-2:#16283A;
+  --line:#26394D;
+  --gold:#C9A227;
+  --gold-soft:#E4C766;
+  --gold-deep:#8B6A1B;
+  --ink:#F4EEE4;
+  --muted:#9FB0BE;
+  --faint:#5E7183;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Inter',Arial,sans-serif;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:820px;margin:0 auto;padding:56px 28px 110px}
+
+.kicker{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold-soft);margin:0 0 18px;
+  display:flex;align-items:center;gap:10px;
+}
+.kicker .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex:none}
+h1{
+  font-family:'Archivo Black',Arial,sans-serif;font-size:clamp(28px,5vw,40px);
+  line-height:1.1;margin:0 0 14px;color:var(--ink);
+}
+.sub{font-size:14.5px;line-height:1.65;color:var(--muted);max-width:62ch;margin:0 0 16px}
+
+.fixnote{
+  background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:2px;padding:14px 18px;margin:24px 0 44px;font-size:13px;line-height:1.6;color:var(--muted);
+}
+.fixnote b{color:var(--ink)}
+
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 44px}
+.stat{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:14px 20px;flex:1;min-width:120px;
+}
+.stat .n{font-family:'Archivo Black';font-size:26px;color:var(--gold-soft)}
+.stat .l{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+
+.section-label{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 20px;display:flex;align-items:center;gap:12px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.module{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:22px 24px;margin:0 0 14px;
+}
+.module-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 14px;flex-wrap:wrap}
+.module-name{font-family:'Archivo Black';font-size:17px;color:var(--ink);margin:0}
+.module-meta{font-family:'IBM Plex Mono';font-size:11px;color:var(--faint)}
+.lesson-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.lesson{
+  display:flex;align-items:baseline;gap:10px;font-size:13.5px;color:var(--ink);
+  padding:6px 0;border-top:1px solid var(--line);
+}
+.lesson:first-child{border-top:none}
+.lesson .num{font-family:'IBM Plex Mono';font-size:11px;color:var(--gold-soft);flex:none;width:34px}
+.lesson .title{flex:1}
+.lesson .dur{font-family:'IBM Plex Mono';font-size:11px;color:var(--faint);flex:none}
+
+.event-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:44px}
+.event{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+}
+.event .name{font-size:14px;color:var(--ink);font-weight:600}
+.event .tag{
+  font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--gold-soft);background:var(--card-2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;
+}
+
+.checklist{margin:0 0 44px;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.checklist li{
+  display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.6;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 18px;
+}
+.checklist .box{
+  flex:none;width:16px;height:16px;border:1.5px solid var(--gold);border-radius:4px;margin-top:2px;
+}
+.checklist b{color:var(--gold-soft)}
+
+footer{padding-top:24px;border-top:1px solid var(--line)}
+.filepath{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);
+  background:var(--card);border:1px solid var(--line);border-radius:4px;padding:8px 12px;display:inline-block;
+}
+</style>
+
+<div class="wrap">
+
+  <p class="kicker"><span class="dot"></span>Guía de configuración · BDL — Bastión De Líderes by Nave</p>
+  <h1>Estructura para Skool</h1>
+  <p class="sub">Módulo = cada semana. Lección = cada video. Copiá estos nombres tal cual al armar el curso en Skool, así el orden y los títulos quedan idénticos a los guiones ya grabados/por grabar.</p>
+
+  <div class="fixnote"><b>Ajuste 2026-09-21:</b> Skool limita el título de lección a 50 caracteres. Los títulos de esta página ya están recortados para entrar en ese límite (marcados con * en la lista de abajo la primera vez que aparecen) — pueden diferir levemente del título completo que usa el guion de grabación por dentro, eso es intencional.</div>
+
+  <div class="fixnote"><b>Corrección (2026-09-21):</b> el conteo real del programa es <b>76 videos</b>, no 66 como se había estimado antes.</div>
+
+  <div class="fixnote"><b>Corrección (2026-10-01):</b> el Módulo 4 se amplió de 8 a 15 lecciones (triage, tracking y roleplay en el entregable, entre otras) — el conteo real del programa ahora es <b>83 lecciones</b>, ~14 horas en total.</div>
+
+  <div class="stats">
+    <div class="stat"><div class="n">11</div><div class="l">Módulos</div></div>
+    <div class="stat"><div class="n">83</div><div class="l">Lecciones</div></div>
+    <div class="stat"><div class="n">~14h</div><div class="l">Contenido total</div></div>
+    <div class="stat"><div class="n">12</div><div class="l">Eventos en vivo</div></div>
+  </div>
+
+  <p class="section-label">Módulos y lecciones</p>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 0 — Diagnóstico y bienvenida</h3><span class="module-meta">3 lecciones · ~21 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">0.1</span><span class="title">Bienvenido a la formación</span><span class="dur">~8 min</span></li>
+      <li class="lesson"><span class="num">0.2</span><span class="title">Cómo vamos a trabajar estas 10 semanas</span><span class="dur">~7 min</span></li>
+      <li class="lesson"><span class="num">0.3</span><span class="title">Tu diagnóstico antes de arrancar</span><span class="dur">~6 min + cuestionario</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 1 — Mentalidad y responsabilidad absoluta</h3><span class="module-meta">7 lecciones · ~76 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">1.1</span><span class="title">Por qué la mentalidad va antes que la técnica</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">1.2</span><span class="title">La ecuación que nadie te cuenta</span><span class="dur">~13 min</span></li>
+      <li class="lesson"><span class="num">1.3</span><span class="title">Ser, hacer, tener</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">1.4</span><span class="title">Responsabilidad absoluta</span><span class="dur">~15 min</span></li>
+      <li class="lesson"><span class="num">1.5</span><span class="title">Destrucción: las creencias que trajiste puestas</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">1.6</span><span class="title">Construcción: quién decidís ser en este puesto</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">1.7</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 2 — Liderazgo de equipo</h3><span class="module-meta">8 lecciones · ~80 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">2.1</span><span class="title">Liderazgo: el corazón y el esqueleto *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">2.2</span><span class="title">Pilar 1 — Visión</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">2.3</span><span class="title">Pilares 2 y 3 — Roles claros y objetivos</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">2.4</span><span class="title">Pilares 4 y 5 — Métricas y premios/castigos *</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">2.5</span><span class="title">La regla del nivel del equipo</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">2.6</span><span class="title">Cómo dar feedback sin romper la relación</span><span class="dur">~13 min</span></li>
+      <li class="lesson"><span class="num">2.7</span><span class="title">Reuniones que valen la pena</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">2.8</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 3 — El salto de setter/closer a director</h3><span class="module-meta">7 lecciones · ~70 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">3.1</span><span class="title">Por qué cerrar bien no te prepara para dirigir *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">3.2</span><span class="title">Setter/closer vs. experto en ventas *</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">3.3</span><span class="title">De cuidar tu número a elevar el estándar de todos</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">3.4</span><span class="title">Instalar criterio, no dar la respuesta masticada</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">3.5</span><span class="title">Cuando ayer eras su compañero y hoy sos su líder</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">3.6</span><span class="title">El objetivo: que el equipo funcione sin vos *</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">3.7</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 4 — El proceso de ventas + benchmarks</h3><span class="module-meta">15 lecciones · ~168 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">4.1</span><span class="title">El proceso de ventas completo, de punta a punta</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">4.2</span><span class="title">Los 5 principios que sostienen toda venta</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">4.3</span><span class="title">BITI vs. BBII: los dos tipos de lead *</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">4.4</span><span class="title">SOP de triage: cómo filtrar sin perder al lead</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">4.5</span><span class="title">Nutrición: el pilar que casi nadie mide bien</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">4.6</span><span class="title">La estructura de una llamada de cierre *</span><span class="dur">~13 min</span></li>
+      <li class="lesson"><span class="num">4.7</span><span class="title">Tonalidad y silencio: la energía de cada etapa</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">4.8</span><span class="title">Cómo resolver objeciones sin pelear con el lead</span><span class="dur">~13 min</span></li>
+      <li class="lesson"><span class="num">4.9</span><span class="title">Follow-up y reactivación de leads perdidos *</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">4.10</span><span class="title">Tu sistema de tracking: la planilla antes *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">4.11</span><span class="title">Los números que indican si un setter está sano</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">4.12</span><span class="title">Los números que indican si un closer está sano</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">4.13</span><span class="title">Show rate: por qué se cae y cómo se sostiene</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">4.14</span><span class="title">Volumen y eficiencia: medir por etapa *</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">4.15</span><span class="title">Tu entregable de esta semana</span><span class="dur">~10 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 5 — Árbol de decisión con métricas</h3><span class="module-meta">7 lecciones · ~73 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">5.1</span><span class="title">Por qué el orden del embudo es sagrado</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">5.2</span><span class="title">Los 3 errores más comunes usando métricas</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">5.3</span><span class="title">Los rangos sanos, explicados uno por uno</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">5.4</span><span class="title">El árbol de decisión completo, paso a paso</span><span class="dur">~13 min</span></li>
+      <li class="lesson"><span class="num">5.5</span><span class="title">El laboratorio de ventas: la autopsia inversa</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">5.6</span><span class="title">Caso práctico: recorriendo el árbol completo</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">5.7</span><span class="title">Tu entregable + Auditoría de Equipo *</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 6 — Contratar multiplicadores</h3><span class="module-meta">7 lecciones · ~70 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">6.1</span><span class="title">Contratar lento, despedir rápido</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">6.2</span><span class="title">Qué buscar según el rol</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">6.3</span><span class="title">Dónde buscar a la gente correcta</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">6.4</span><span class="title">Documentar antes de sumar a nadie: los SOPs</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">6.5</span><span class="title">El día cero: los primeros 30 días son críticos</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">6.6</span><span class="title">Yo lo hago, lo hacemos, lo hacés vos</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">6.7</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 7 — Enseñar a cerrar (los 6 SOPs)</h3><span class="module-meta">9 lecciones · ~87 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">7.1</span><span class="title">Cerrar y enseñar a cerrar: oficios distintos *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">7.2</span><span class="title">SOP 1 — Autoridad</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">7.3</span><span class="title">SOP 2 — Generar urgencia natural</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">7.4</span><span class="title">SOP 3 — Downsells y cuotas sin perder autoridad</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">7.5</span><span class="title">SOP 4 — Manejar leads con ego</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">7.6</span><span class="title">SOP 5 — Detectar creencias limitantes y dolores</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">7.7</span><span class="title">SOP 6 — Marco de identidad de comprador</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">7.8</span><span class="title">Cómo armar un roleplay que realmente forme</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">7.9</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 8 — Diseño de comisiones sin fricción</h3><span class="module-meta">7 lecciones · ~68 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">8.1</span><span class="title">Comisiones mal diseñadas destruyen equipos *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">8.2</span><span class="title">Comisiones escalonadas por objetivo</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">8.3</span><span class="title">Comisión: cash neto, no bruto *</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">8.4</span><span class="title">Configurar una vez, no negociar cada mes</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">8.5</span><span class="title">Upfront y cuotas: cómo se reparte una venta *</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">8.6</span><span class="title">El reporte que dispara todo</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">8.7</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 9 — Ventas alimentando a marketing</h3><span class="module-meta">7 lecciones · ~67 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">9.1</span><span class="title">El closer: motor de crecimiento, no solo cierre *</span><span class="dur">~9 min</span></li>
+      <li class="lesson"><span class="num">9.2</span><span class="title">El reporte de calls: qué capturar y cómo</span><span class="dur">~12 min</span></li>
+      <li class="lesson"><span class="num">9.3</span><span class="title">De transcripción a reporte: herramienta práctica *</span><span class="dur">~8 min</span></li>
+      <li class="lesson"><span class="num">9.4</span><span class="title">De objeción a contenido: el círculo completo</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">9.5</span><span class="title">Laboratorio de contenido 3.0: combinación ganadora *</span><span class="dur">~11 min</span></li>
+      <li class="lesson"><span class="num">9.6</span><span class="title">La reunión semanal ventas-marketing</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">9.7</span><span class="title">Tu entregable de esta semana</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <div class="module">
+    <div class="module-head"><h3 class="module-name">Módulo 10 — Caso integrador + certificación</h3><span class="module-meta">6 lecciones · ~55 min</span></div>
+    <ol class="lesson-list">
+      <li class="lesson"><span class="num">10.1</span><span class="title">Por qué la vida real no viene con un problema *</span><span class="dur">~8 min</span></li>
+      <li class="lesson"><span class="num">10.2</span><span class="title">El caso: conocé al equipo</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">10.3</span><span class="title">Cómo priorizar cuando todo está roto *</span><span class="dur">~10 min</span></li>
+      <li class="lesson"><span class="num">10.4</span><span class="title">Resolviendo el caso, paso a paso</span><span class="dur">~14 min</span></li>
+      <li class="lesson"><span class="num">10.5</span><span class="title">Tu entregable final: plan de 30 días *</span><span class="dur">~7 min</span></li>
+      <li class="lesson"><span class="num">10.6</span><span class="title">Cierre del programa y certificación + 1:1 *</span><span class="dur">~6 min</span></li>
+    </ol>
+  </div>
+
+  <p class="section-label">Calendario (eventos en vivo de Skool)</p>
+  <ul class="event-list">
+    <li class="event"><span class="name">Live Semana 1 — Mentalidad</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Live Semana 2 — Liderazgo</span><span class="tag">Grupal + roleplay</span></li>
+    <li class="event"><span class="name">Live Semana 3 — El salto a director</span><span class="tag">Grupal + roleplay</span></li>
+    <li class="event"><span class="name">Live Semana 4 — Proceso de ventas</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Live Semana 5 — Árbol de decisión</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Auditoría de Equipo BDL (1:1)</span><span class="tag">Individual · mitad de programa</span></li>
+    <li class="event"><span class="name">Live Semana 6 — Contratar multiplicadores</span><span class="tag">Grupal + roleplay</span></li>
+    <li class="event"><span class="name">Live Semana 7 — Enseñar a cerrar</span><span class="tag">Grupal + roleplay</span></li>
+    <li class="event"><span class="name">Live Semana 8 — Comisiones</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Live Semana 9 — Ventas y marketing</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Live Semana 10 — Caso integrador</span><span class="tag">Grupal</span></li>
+    <li class="event"><span class="name">Llamada de cierre (1:1)</span><span class="tag">Individual · fin de programa</span></li>
+  </ul>
+
+  <p class="section-label">Checklist de configuración</p>
+  <ul class="checklist">
+    <li><span class="box"></span><span><b>Nombre y branding del space:</b> "BDL — Bastión De Líderes by Nave", usando la insignia y colores de Marca BDL como ícono del space y banner.</span></li>
+    <li><span class="box"></span><span><b>Precio:</b> $2.000, configurado como membresía paga de este course/space específico (no mezclado con el resto de la comunidad de Instituto Nave si es un space aparte).</span></li>
+    <li><span class="box"></span><span><b>11 módulos + 83 lecciones</b> cargados con los nombres exactos de arriba, en orden.</span></li>
+    <li><span class="box"></span><span><b>Cuaderno de Trabajo BDL</b> subido como PDF descargable — adjunto a cada módulo (la sección correspondiente) o como resource general fijado.</span></li>
+    <li><span class="box"></span><span><b>12 eventos</b> cargados en el calendario nativo de Skool, con recordatorio automático activado.</span></li>
+    <li><span class="box"></span><span><b>Reglas de comunidad</b> (ya redactadas en Recursos y Bonus BDL) pegadas en la sección About/Rules del space.</span></li>
+    <li><span class="box"></span><span><b>Mensaje de bienvenida</b> (ya redactado) configurado como pin o automatización de bienvenida a nuevos miembros.</span></li>
+    <li><span class="box"></span><span><b>Planilla de Métricas y plantilla de comisiones</b> subidas como resources descargables.</span></li>
+    <li><span class="box"></span><span><b>Certificado:</b> queda fuera de Skool — proceso manual, se completa y se envía por fuera al terminar el Módulo 10.</span></li>
+  </ul>
+
+  <footer>
+    <p class="filepath">Desktop/Bastión De Líderes/BDL Skool/estructura-skool.html</p>
+  </footer>
+
+</div>
