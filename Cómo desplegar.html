@@ -62,10 +62,14 @@ li{margin-bottom:6px}
 <h2>Roles: founder y admin</h2>
 <p>Además de vos (founder), podés darle el panel Admin a alguien más — en <b>Miembros</b>, en la fila de esa persona, cambiale el rol a <code>admin</code> y Guardar. Puede aprobar miembros, desbloquear semanas y cargar videos igual que vos.</p>
 
+<h2>Recursos por lección</h2>
+<p>Debajo de cada video podés dejar el entregable, un link a un documento o lo que haga falta. Se carga desde <b>Admin → Recursos por lección</b> — elegís la lección, le ponés un título y, si aplica, un link (el link es opcional: sin él queda como una nota de texto suelta). Aparece al toque para quien tenga esa semana desbloqueada.</p>
+
 <h2>Si ya tenías el proyecto armado antes de estos cambios</h2>
 <div class="paso">Corré, en este orden, en el SQL Editor (una sola vez cada uno):
 <br>1. <code>migracion-desbloqueo-manual.sql</code> — agrega el desbloqueo manual por semana.
 <br>2. <code>migracion-registro-aprobacion.sql</code> — agrega el registro público y la aprobación de miembros.
-<br>Ninguno de los dos toca lo que ya tenés cargado, y no hace falta volver a correr <code>seed.sql</code>.</div>
+<br>3. <code>migracion-recursos.sql</code> — agrega los recursos por lección.
+<br>Ninguno toca lo que ya tenés cargado, y no hace falta volver a correr <code>seed.sql</code>.</div>
 
 </div>

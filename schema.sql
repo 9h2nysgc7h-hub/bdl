@@ -89,6 +89,19 @@ create table if not exists lecciones (
   orden int not null
 );
 
+-- ---------- RECURSOS POR LECCIÓN ----------
+-- Documentos, links o la consigna del entregable, colgados debajo del
+-- video de cada lección. Se cargan y borran desde Admin, no por SQL.
+create table if not exists recursos (
+  id bigint generated always as identity primary key,
+  leccion_id text not null references lecciones(id) on delete cascade,
+  titulo text not null,
+  url text,
+  descripcion text,
+  orden int not null default 0,
+  created_at timestamptz not null default now()
+);
+
 -- ---------- PROGRESO POR ALUMNO ----------
 create table if not exists progreso (
   alumno_id uuid not null references profiles(id) on delete cascade,
@@ -125,6 +138,7 @@ create table if not exists cierre (
 alter table profiles enable row level security;
 alter table modulos enable row level security;
 alter table lecciones enable row level security;
+alter table recursos enable row level security;
 alter table progreso enable row level security;
 alter table diagnostico enable row level security;
 alter table cierre enable row level security;
@@ -142,6 +156,11 @@ create policy "staff edita modulos" on modulos for all
 create policy "ver lecciones" on lecciones for select
   using (esta_aprobado());
 create policy "staff edita lecciones" on lecciones for all
+  using (es_staff());
+
+create policy "ver recursos" on recursos for select
+  using (esta_aprobado());
+create policy "staff edita recursos" on recursos for all
   using (es_staff());
 
 create policy "ver progreso" on progreso for select
