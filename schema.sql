@@ -15,6 +15,10 @@ create table if not exists profiles (
   fecha_inicio date not null default current_date,
   modulo_actual int not null default 0,       -- semana más alta desbloqueada; la sube el founder/admin a mano
   pidio_desbloqueo boolean not null default false, -- el alumno avisó que terminó y espera que lo desbloqueen
+  pidio_desbloqueo_at timestamptz,     -- cuándo avisó, para ver antigüedad en Admin
+  ultimo_acceso timestamptz,           -- se actualiza solo en cada login
+  aprobado_visto boolean not null default false, -- ya vio el banner de "te aprobaron"
+  modulo_visto int not null default 0, -- última semana cuyo desbloqueo ya vio
   aprobado boolean not null default false,    -- alguien tiene que aprobarlo desde Admin → Miembros antes de que entre
   created_at timestamptz not null default now()
 );
@@ -53,6 +57,36 @@ drop trigger if exists trg_proteger_perfil on profiles;
 create trigger trg_proteger_perfil
   before update on profiles
   for each row execute procedure public.proteger_columnas_perfil();
+
+-- Registra solo cuándo empezó y terminó cada semana: al aprobar arranca
+-- el reloj de la Semana 0; cada cambio de modulo_actual cierra la
+-- semana anterior y abre la nueva. No hace falta cargar nada a mano.
+create or replace function public.registrar_avance_semana()
+returns trigger as $$
+begin
+  if coalesce(old.aprobado,false) = false and new.aprobado = true then
+    insert into avance_semanas (alumno_id, modulo_numero, iniciado_at)
+    values (new.id, 0, now());
+  end if;
+
+  if new.modulo_actual is distinct from old.modulo_actual then
+    update avance_semanas set completado_at = now()
+      where alumno_id = new.id and modulo_numero = old.modulo_actual and completado_at is null;
+    insert into avance_semanas (alumno_id, modulo_numero, iniciado_at)
+      select new.id, new.modulo_actual, now()
+      where not exists (
+        select 1 from avance_semanas where alumno_id = new.id and modulo_numero = new.modulo_actual
+      );
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+drop trigger if exists trg_registrar_avance on profiles;
+create trigger trg_registrar_avance
+  after update on profiles
+  for each row execute procedure public.registrar_avance_semana();
 
 -- Alta automática de perfil cuando alguien se registra. El nombre y
 -- apellido que puso en el formulario viaja en raw_user_meta_data.
@@ -112,6 +146,16 @@ create table if not exists progreso (
   primary key (alumno_id, leccion_id)
 );
 
+-- ---------- HISTORIAL: cuándo empezó y terminó cada semana ----------
+-- Se registra solo con un trigger — ver registrar_avance_semana más abajo.
+create table if not exists avance_semanas (
+  id bigint generated always as identity primary key,
+  alumno_id uuid not null references profiles(id) on delete cascade,
+  modulo_numero int not null,
+  iniciado_at timestamptz not null default now(),
+  completado_at timestamptz
+);
+
 -- ---------- FOTO ANTES / DESPUÉS (Semana 0 vs. Semana 10) ----------
 create table if not exists diagnostico (
   alumno_id uuid primary key references profiles(id) on delete cascade,
@@ -141,6 +185,7 @@ alter table modulos enable row level security;
 alter table lecciones enable row level security;
 alter table recursos enable row level security;
 alter table progreso enable row level security;
+alter table avance_semanas enable row level security;
 alter table diagnostico enable row level security;
 alter table cierre enable row level security;
 
@@ -166,6 +211,9 @@ create policy "staff edita recursos" on recursos for all
 
 create policy "ver progreso" on progreso for select
   using (auth.uid() = alumno_id or es_staff());
+
+create policy "ver avance" on avance_semanas for select
+  using (alumno_id = auth.uid() or es_staff());
 create policy "marcar propio progreso" on progreso for insert
   with check (auth.uid() = alumno_id and esta_aprobado());
 create policy "desmarcar propio progreso" on progreso for delete

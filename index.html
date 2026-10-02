@@ -67,6 +67,9 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 
 /* ---- dashboard ---- */
 .hero{display:flex;align-items:center;justify-content:space-between;gap:20px;background:linear-gradient(160deg,var(--card),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:24px 28px;margin-bottom:22px;flex-wrap:wrap;box-shadow:0 20px 50px -30px rgba(var(--shadow),.7)}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--gold);color:#1A1406;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:13.5px;font-weight:600;flex-wrap:wrap}
+.banner button{background:rgba(0,0,0,.15);border:0;color:#1A1406}
+.banner button:hover{background:rgba(0,0,0,.25);border-color:transparent}
 .hero h2{font-family:'Archivo Black';font-size:19px;font-weight:400;margin:0 0 4px}
 .hero p{margin:0;color:var(--muted);font-size:13px}
 .hero-ring{width:60px;height:60px;position:relative;flex:none}
@@ -247,6 +250,14 @@ function toast(msg){
   toast._t = setTimeout(() => t.classList.add('hidden'), 2200);
 }
 
+function hace(fechaIso){
+  if (!fechaIso) return '—';
+  const dias = Math.floor((Date.now() - new Date(fechaIso).getTime()) / 86400000);
+  if (dias <= 0) return 'hoy';
+  if (dias === 1) return 'ayer';
+  return `hace ${dias} días`;
+}
+
 // ---------- duración real desde YouTube ----------
 function parseISODuration(iso){
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -403,7 +414,15 @@ function renderDashboard(){
   const pct = Math.round((hechas/total)*100);
   const staff = esStaff(state.profile);
 
-  let html = `
+  let html = '';
+
+  if (!staff && state.profile.aprobado && !state.profile.aprobado_visto){
+    html += `<div class="banner"><p style="margin:0">¡Tu cuenta fue aprobada! Ya podés arrancar con la Semana 0.</p><button id="banner-aprobado-ok">Entendido</button></div>`;
+  } else if (!staff && state.profile.modulo_actual > state.profile.modulo_visto){
+    html += `<div class="banner"><p style="margin:0">¡Se desbloqueó la Semana ${state.profile.modulo_actual}!</p><button id="banner-modulo-ok">Entendido</button></div>`;
+  }
+
+  html += `
     <div class="hero">
       <div>
         <h2>Hola, ${state.profile.nombre}</h2>
@@ -463,11 +482,24 @@ function renderDashboard(){
   });
   const btnAvisar = $('#btn-avisar');
   if (btnAvisar) btnAvisar.onclick = async () => {
-    await sb.from('profiles').update({ pidio_desbloqueo: true }).eq('id', state.user.id);
+    const ahora = new Date().toISOString();
+    await sb.from('profiles').update({ pidio_desbloqueo: true, pidio_desbloqueo_at: ahora }).eq('id', state.user.id);
     state.profile.pidio_desbloqueo = true;
+    state.profile.pidio_desbloqueo_at = ahora;
     toast('Le avisamos al founder');
     renderDashboard();
   };
+
+  $('#banner-aprobado-ok')?.addEventListener('click', async () => {
+    await sb.from('profiles').update({ aprobado_visto: true }).eq('id', state.user.id);
+    state.profile.aprobado_visto = true;
+    renderDashboard();
+  });
+  $('#banner-modulo-ok')?.addEventListener('click', async () => {
+    await sb.from('profiles').update({ modulo_visto: state.profile.modulo_actual }).eq('id', state.user.id);
+    state.profile.modulo_visto = state.profile.modulo_actual;
+    renderDashboard();
+  });
 }
 
 function cardLeccion(l, desbloqueado){
@@ -758,18 +790,40 @@ function renderPerfil(){
 async function renderAdmin(){
   if (!esStaff(state.profile)){ location.hash = '#/'; return; }
 
-  const [{data: alumnos}, {data: todoProgreso}] = await Promise.all([
+  const [{data: alumnos}, {data: todoProgreso}, {data: todoAvance}] = await Promise.all([
     sb.from('profiles').select('*').order('created_at'),
     sb.from('progreso').select('alumno_id'),
+    sb.from('avance_semanas').select('*').order('modulo_numero'),
   ]);
   const totalLec = state.lecciones.length;
   const conteo = {};
   (todoProgreso||[]).forEach(p => conteo[p.alumno_id] = (conteo[p.alumno_id]||0)+1);
+  const avancePorAlumno = {};
+  (todoAvance||[]).forEach(v => { (avancePorAlumno[v.alumno_id] ||= []).push(v); });
+  const fechaCorta = (iso) => iso ? new Date(iso).toLocaleDateString('es-AR', { day:'numeric', month:'short' }) : '—';
+  const diasEntre = (ini, fin) => Math.max(0, Math.round((new Date(fin||Date.now()) - new Date(ini)) / 86400000));
 
   const pendientesAprobacion = (alumnos||[]).filter(a => a.rol === 'alumno' && !a.aprobado);
-  const pedidosDesbloqueo = (alumnos||[]).filter(a => a.rol === 'alumno' && a.aprobado && a.pidio_desbloqueo);
+  const pedidosDesbloqueo = (alumnos||[]).filter(a => a.rol === 'alumno' && a.aprobado && a.pidio_desbloqueo)
+    .sort((a,b) => (a.pidio_desbloqueo_at||'').localeCompare(b.pidio_desbloqueo_at||''));
+  const aprobados = (alumnos||[]).filter(a => a.rol === 'alumno' && a.aprobado);
+  const avanceProm = aprobados.length
+    ? Math.round(aprobados.reduce((s,a) => s + (conteo[a.id]||0), 0) / aprobados.length / totalLec * 100)
+    : 0;
+  const porSemana = {};
+  aprobados.forEach(a => { porSemana[a.modulo_actual] = (porSemana[a.modulo_actual]||0) + 1; });
 
   let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Admin</h2>`;
+
+  html += `<div class="box"><h3>Resumen</h3>
+    <div class="foto-grid">
+      <div class="foto-stat"><div class="l">Miembros aprobados</div><div class="v">${aprobados.length}</div></div>
+      <div class="foto-stat"><div class="l">Avance promedio</div><div class="v">${avanceProm}%</div></div>
+      <div class="foto-stat"><div class="l">Pendientes de aprobar</div><div class="v">${pendientesAprobacion.length}</div></div>
+      <div class="foto-stat"><div class="l">Pedidos de desbloqueo</div><div class="v">${pedidosDesbloqueo.length}</div></div>
+    </div>
+    ${aprobados.length ? `<p class="d" style="margin:16px 0 0">Por semana: ${Object.keys(porSemana).sort((a,b)=>a-b).map(s => `Semana ${s}: ${porSemana[s]}`).join(' · ')}</p>` : ''}
+  </div>`;
 
   html += `<div class="box"><h3>Miembros pendientes de aprobación</h3><p class="d">Se registraron solos desde el login y están esperando que los habilites.</p>`;
   html += pendientesAprobacion.length
@@ -785,10 +839,11 @@ async function renderAdmin(){
 
   html += `<div class="box"><h3>Pedidos de desbloqueo</h3><p class="d">Miembros que avisaron que terminaron su semana actual y el entregable.</p>`;
   html += pedidosDesbloqueo.length
-    ? `<table class="admin"><tr><th>Nombre</th><th>Semana actual</th><th></th></tr>
+    ? `<table class="admin"><tr><th>Nombre</th><th>Semana actual</th><th>Esperando</th><th></th></tr>
        ${pedidosDesbloqueo.map(a => `<tr>
          <td>${a.nombre}</td>
          <td class="mono">Semana ${a.modulo_actual}</td>
+         <td class="mono" style="${hace(a.pidio_desbloqueo_at).startsWith('hace') && parseInt(hace(a.pidio_desbloqueo_at))>2 ? 'color:var(--warn)' : ''}">${hace(a.pidio_desbloqueo_at)}</td>
          <td><button class="primary" data-desbloquear="${a.id}" data-actual="${a.modulo_actual}">Desbloquear Semana ${a.modulo_actual+1}</button></td>
        </tr>`).join('')}
        </table>`
@@ -796,19 +851,32 @@ async function renderAdmin(){
   html += `</div>`;
 
   html += `<div class="box"><h3>Miembros</h3><p class="d">Acá controlás el rol, la semana y la aprobación de cada persona a mano, sin esperar su pedido.</p>
-    <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Semana</th><th>Estado</th><th></th><th>Progreso</th></tr>
-    ${(alumnos||[]).map(a => a.rol === 'founder' ? `<tr>
+    <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Semana</th><th>Estado</th><th>Último acceso</th><th>En esta semana</th><th></th><th>Progreso</th><th></th></tr>
+    ${(alumnos||[]).map(a => {
+      const avanceAlumno = avancePorAlumno[a.id] || [];
+      const enCurso = avanceAlumno.find(v => v.modulo_numero === a.modulo_actual && !v.completado_at);
+      const diasEtapa = enCurso ? diasEntre(enCurso.iniciado_at, null) : null;
+      const historialHtml = avanceAlumno.length
+        ? avanceAlumno.map(v => `Semana ${v.modulo_numero}: empezó ${fechaCorta(v.iniciado_at)}${v.completado_at ? ` — terminó ${fechaCorta(v.completado_at)} (${diasEntre(v.iniciado_at, v.completado_at)} días)` : ` — en curso (${diasEntre(v.iniciado_at, null)} días)`}`).join('<br>')
+        : 'Sin historial todavía — se empieza a registrar desde que se corrió la migración.';
+      if (a.rol === 'founder') return `<tr>
         <td>${a.nombre}</td><td class="mono">${a.email||'—'}</td>
-        <td><span class="tag-rol">founder</span></td><td>—</td><td>—</td><td></td><td>${conteo[a.id]||0}/${totalLec}</td>
-      </tr>` : `<tr>
+        <td><span class="tag-rol">founder</span></td><td>—</td><td>—</td><td class="mono">${hace(a.ultimo_acceso)}</td><td>—</td><td></td><td>${conteo[a.id]||0}/${totalLec}</td><td></td>
+      </tr>`;
+      return `<tr>
         <td>${a.nombre}</td>
         <td class="mono">${a.email||'—'}</td>
         <td><select id="rol-${a.id}"><option value="alumno" ${a.rol==='alumno'?'selected':''}>alumno</option><option value="admin" ${a.rol==='admin'?'selected':''}>admin</option></select></td>
         <td><input type="number" min="0" max="10" style="width:56px" id="mod-${a.id}" value="${a.modulo_actual}"></td>
         <td>${a.aprobado ? '<span class="tag-rol" style="color:var(--ok)">aprobado</span>' : '<span class="tag-rol" style="color:var(--warn)">pendiente</span>'}</td>
+        <td class="mono">${hace(a.ultimo_acceso)}</td>
+        <td class="mono">${diasEtapa === null ? '—' : diasEtapa + ' días'}</td>
         <td><button data-setmod="${a.id}">Guardar</button></td>
         <td>${conteo[a.id]||0}/${totalLec}</td>
-      </tr>`).join('')}
+        <td><button data-toggle-historial="${a.id}">Historial</button></td>
+      </tr>
+      <tr class="hidden" id="historial-${a.id}"><td colspan="10" style="background:var(--bg-2);font-size:12.5px;color:var(--muted);line-height:1.8">${historialHtml}</td></tr>`;
+    }).join('')}
     </table>
   </div>`;
 
@@ -873,7 +941,7 @@ async function renderAdmin(){
   $$('button[data-desbloquear]').forEach(btn => btn.onclick = async () => {
     const id = btn.dataset.desbloquear;
     const nuevo = parseInt(btn.dataset.actual) + 1;
-    await sb.from('profiles').update({ modulo_actual: nuevo, pidio_desbloqueo: false }).eq('id', id);
+    await sb.from('profiles').update({ modulo_actual: nuevo, pidio_desbloqueo: false, pidio_desbloqueo_at: null }).eq('id', id);
     toast('Desbloqueado');
     renderAdmin();
   });
@@ -884,6 +952,9 @@ async function renderAdmin(){
     await sb.from('profiles').update({ modulo_actual: val, rol }).eq('id', id);
     toast('Actualizado');
     renderAdmin();
+  });
+  $$('button[data-toggle-historial]').forEach(btn => btn.onclick = () => {
+    document.getElementById('historial-'+btn.dataset.toggleHistorial)?.classList.toggle('hidden');
   });
   $$('button[data-save]').forEach(btn => btn.onclick = async () => {
     const id = btn.dataset.save;
@@ -1018,6 +1089,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
     $('#nav-admin').classList.toggle('hidden', !esStaff(profile));
     removeLoginScreen();
     $('#app').classList.remove('hidden');
+    sb.from('profiles').update({ ultimo_acceso: new Date().toISOString() }).eq('id', profile.id)
+      .then(() => { profile.ultimo_acceso = new Date().toISOString(); });
     await cargarDatosBase();
     route();
   } else {
