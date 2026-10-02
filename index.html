@@ -179,6 +179,7 @@ table.admin input{padding:6px 8px;font-size:12.5px}
     </div>
     <div class="nav-right">
       <a class="nav-link" data-nav="#/perfil">Tu progreso</a>
+      <a class="nav-link hidden" id="nav-alumnos" data-nav="#/alumnos">Alumnos</a>
       <a class="nav-link hidden" id="nav-admin" data-nav="#/admin">Admin</a>
       <a class="nav-link" id="nav-logout">Salir</a>
       <div class="ring">
@@ -334,6 +335,7 @@ async function route(){
   if (hash === '#/' ) renderDashboard();
   else if (hash.startsWith('#/leccion/')) renderLeccion(hash.split('/')[2]);
   else if (hash === '#/perfil') renderPerfil();
+  else if (hash === '#/alumnos') renderAlumnos();
   else if (hash === '#/admin') renderAdmin();
   else renderDashboard();
 }
@@ -786,10 +788,8 @@ function renderPerfil(){
   function num(id){ const v = $('#'+id).value; return v === '' ? null : parseFloat(v); }
 }
 
-// ---------- admin ----------
-async function renderAdmin(){
-  if (!esStaff(state.profile)){ location.hash = '#/'; return; }
-
+// ---------- datos compartidos de alumnos (Admin + Alumnos) ----------
+async function obtenerDatosAlumnos(){
   const [{data: alumnos}, {data: todoProgreso}, {data: todoAvance}] = await Promise.all([
     sb.from('profiles').select('*').order('created_at'),
     sb.from('progreso').select('alumno_id'),
@@ -813,17 +813,31 @@ async function renderAdmin(){
   const porSemana = {};
   aprobados.forEach(a => { porSemana[a.modulo_actual] = (porSemana[a.modulo_actual]||0) + 1; });
 
+  return { alumnos: alumnos||[], totalLec, conteo, avancePorAlumno, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo, aprobados, avanceProm, porSemana };
+}
+
+function resumenHtml(d){
+  return `<div class="box"><h3>Resumen</h3>
+    <div class="foto-grid">
+      <div class="foto-stat"><div class="l">Miembros aprobados</div><div class="v">${d.aprobados.length}</div></div>
+      <div class="foto-stat"><div class="l">Avance promedio</div><div class="v">${d.avanceProm}%</div></div>
+      <div class="foto-stat"><div class="l">Pendientes de aprobar</div><div class="v">${d.pendientesAprobacion.length}</div></div>
+      <div class="foto-stat"><div class="l">Pedidos de desbloqueo</div><div class="v">${d.pedidosDesbloqueo.length}</div></div>
+    </div>
+    ${d.aprobados.length ? `<p class="d" style="margin:16px 0 0">Por semana: ${Object.keys(d.porSemana).sort((a,b)=>a-b).map(s => `Semana ${s}: ${d.porSemana[s]}`).join(' · ')}</p>` : ''}
+  </div>`;
+}
+
+// ---------- admin ----------
+async function renderAdmin(){
+  if (!esStaff(state.profile)){ location.hash = '#/'; return; }
+
+  const d = await obtenerDatosAlumnos();
+  const { alumnos, totalLec, conteo, avancePorAlumno, fechaCorta, diasEntre, pendientesAprobacion, pedidosDesbloqueo } = d;
+
   let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Admin</h2>`;
 
-  html += `<div class="box"><h3>Resumen</h3>
-    <div class="foto-grid">
-      <div class="foto-stat"><div class="l">Miembros aprobados</div><div class="v">${aprobados.length}</div></div>
-      <div class="foto-stat"><div class="l">Avance promedio</div><div class="v">${avanceProm}%</div></div>
-      <div class="foto-stat"><div class="l">Pendientes de aprobar</div><div class="v">${pendientesAprobacion.length}</div></div>
-      <div class="foto-stat"><div class="l">Pedidos de desbloqueo</div><div class="v">${pedidosDesbloqueo.length}</div></div>
-    </div>
-    ${aprobados.length ? `<p class="d" style="margin:16px 0 0">Por semana: ${Object.keys(porSemana).sort((a,b)=>a-b).map(s => `Semana ${s}: ${porSemana[s]}`).join(' · ')}</p>` : ''}
-  </div>`;
+  html += resumenHtml(d);
 
   html += `<div class="box"><h3>Miembros pendientes de aprobación</h3><p class="d">Se registraron solos desde el login y están esperando que los habilites.</p>`;
   html += pendientesAprobacion.length
@@ -1074,6 +1088,47 @@ async function renderAdmin(){
   });
 }
 
+// ---------- alumnos (vista de solo lectura, toda la data junta) ----------
+async function renderAlumnos(){
+  if (!esStaff(state.profile)){ location.hash = '#/'; return; }
+
+  const d = await obtenerDatosAlumnos();
+  const { totalLec, conteo, avancePorAlumno, fechaCorta, diasEntre } = d;
+  const lista = [...d.pendientesAprobacion, ...d.aprobados];
+
+  let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Alumnos</h2>`;
+  html += resumenHtml(d);
+
+  html += `<div class="box"><h3>Todos los alumnos</h3><p class="d">${lista.length} en total. Para aprobar, desbloquear o cambiar roles, andá a Admin — acá es solo para ver todo junto.</p>
+    <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Estado</th><th>Semana</th><th>En esta semana</th><th>Último acceso</th><th>Progreso</th><th></th></tr>
+    ${lista.map(a => {
+      const avanceAlumno = avancePorAlumno[a.id] || [];
+      const enCurso = avanceAlumno.find(v => v.modulo_numero === a.modulo_actual && !v.completado_at);
+      const diasEtapa = enCurso ? diasEntre(enCurso.iniciado_at, null) : null;
+      const historialHtml = avanceAlumno.length
+        ? avanceAlumno.map(v => `Semana ${v.modulo_numero}: empezó ${fechaCorta(v.iniciado_at)}${v.completado_at ? ` — terminó ${fechaCorta(v.completado_at)} (${diasEntre(v.iniciado_at, v.completado_at)} días)` : ` — en curso (${diasEntre(v.iniciado_at, null)} días)`}`).join('<br>')
+        : 'Sin historial todavía.';
+      return `<tr>
+        <td>${a.nombre}</td>
+        <td class="mono">${a.email||'—'}</td>
+        <td>${a.aprobado ? '<span class="tag-rol" style="color:var(--ok)">aprobado</span>' : '<span class="tag-rol" style="color:var(--warn)">pendiente</span>'}</td>
+        <td class="mono">${a.aprobado ? 'Semana '+a.modulo_actual : '—'}</td>
+        <td class="mono">${diasEtapa === null ? '—' : diasEtapa + ' días'}</td>
+        <td class="mono">${hace(a.ultimo_acceso)}</td>
+        <td>${conteo[a.id]||0}/${totalLec}</td>
+        <td><button data-toggle-historial2="${a.id}">Historial</button></td>
+      </tr>
+      <tr class="hidden" id="historial2-${a.id}"><td colspan="8" style="background:var(--bg-2);font-size:12.5px;color:var(--muted);line-height:1.8">${historialHtml}</td></tr>`;
+    }).join('') || `<tr><td colspan="8" style="color:var(--faint)">Todavía no hay alumnos registrados.</td></tr>`}
+    </table>
+  </div>`;
+
+  view.innerHTML = html;
+  $$('button[data-toggle-historial2]').forEach(btn => btn.onclick = () => {
+    document.getElementById('historial2-'+btn.dataset.toggleHistorial2)?.classList.toggle('hidden');
+  });
+}
+
 // ---------- auth bootstrap ----------
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session?.user){
@@ -1087,6 +1142,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     }
 
     $('#nav-admin').classList.toggle('hidden', !esStaff(profile));
+    $('#nav-alumnos').classList.toggle('hidden', !esStaff(profile));
     removeLoginScreen();
     $('#app').classList.remove('hidden');
     sb.from('profiles').update({ ultimo_acceso: new Date().toISOString() }).eq('id', profile.id)
