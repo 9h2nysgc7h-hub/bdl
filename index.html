@@ -88,7 +88,8 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 .card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 14px 28px -16px rgba(var(--shadow),.7)}
 .card.locked{cursor:default;opacity:.5}
 .card.locked:hover{border-color:var(--line);transform:none}
-.thumb{aspect-ratio:16/9;background:linear-gradient(145deg,var(--bg-2),var(--card) 70%);display:flex;align-items:flex-end;justify-content:flex-start;position:relative;padding:12px}
+.thumb{aspect-ratio:16/9;background:linear-gradient(145deg,var(--bg-2),var(--card) 70%);display:flex;align-items:flex-end;justify-content:flex-start;position:relative;padding:12px;overflow:hidden}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .thumb .num-big{font-family:'IBM Plex Mono';font-size:13px;color:var(--faint);letter-spacing:.03em}
 .thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.55);font-size:10px;padding:3px 7px;border-radius:4px;font-family:'IBM Plex Mono';color:var(--ink)}
 .thumb .state{position:absolute;left:8px;top:8px;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff}
@@ -116,6 +117,9 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 .yt-btn:hover{color:var(--gold-soft);border-color:transparent}
 .yt-btn svg{width:16px;height:16px}
 .yt-time{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink);white-space:nowrap}
+.yt-cc{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:10px;border:1px solid var(--muted) !important;border-radius:3px;padding:3px 6px !important;color:var(--muted)}
+.yt-cc.on{color:var(--gold-soft);border-color:var(--gold-soft) !important}
+.yt-speed{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 7px !important;color:var(--ink);min-width:34px}
 .yt-seek{flex:1;height:4px;background:rgba(255,255,255,.25);border-radius:2px;cursor:pointer;position:relative}
 .yt-seek-fill{height:100%;background:var(--gold);border-radius:2px;width:0%}
 .leccion-actions{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -197,6 +201,10 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 // ============================================================
 const SUPABASE_URL = 'https://uboptojhywisxjokaljv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib3B0b2poeXdpc3hqb2thbGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MDU4NjMsImV4cCI6MjEwNjQ4MTg2M30.gQhnWBCQPeRsKLeVzZkMD6wIKLaoCL-6b0-tsbHoZuY';
+// Opcional: API key de YouTube Data v3 (gratis, ver "Cómo desplegar.html").
+// Sin ella, el ID de video se guarda igual, pero no se puede sincronizar
+// la duración real automáticamente.
+const YOUTUBE_API_KEY = '';
 // ============================================================
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -237,6 +245,26 @@ function toast(msg){
   t.classList.remove('hidden');
   clearTimeout(toast._t);
   toast._t = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+// ---------- duración real desde YouTube ----------
+function parseISODuration(iso){
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return null;
+  const h = parseInt(m[1]||0, 10), min = parseInt(m[2]||0, 10), s = parseInt(m[3]||0, 10);
+  return Math.max(1, Math.round(h*60 + min + s/60));
+}
+
+async function fetchDuracionReal(youtubeId){
+  if (!YOUTUBE_API_KEY) return null;
+  try {
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${youtubeId}&part=contentDetails&key=${YOUTUBE_API_KEY}`);
+    const data = await res.json();
+    const iso = data?.items?.[0]?.contentDetails?.duration;
+    return iso ? parseISODuration(iso) : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function esStaff(profile){
@@ -444,10 +472,13 @@ function renderDashboard(){
 
 function cardLeccion(l, desbloqueado){
   const completado = state.progreso.has(l.id);
+  const thumbContent = l.youtube_id
+    ? `<img src="https://img.youtube.com/vi/${l.youtube_id}/hqdefault.jpg" alt="" loading="lazy">`
+    : `<span class="num-big mono">${l.numero}</span>`;
   return `
     <div class="card ${desbloqueado ? '' : 'locked'}" data-id="${l.id}">
       <div class="thumb">
-        <span class="num-big mono">${l.numero}</span>
+        ${thumbContent}
         ${!desbloqueado ? `<div class="state">${iconSm(ICON.lock)}</div>` : completado ? `<div class="state ok">${iconSm(ICON.check)}</div>` : ''}
         <span class="dur">${l.duracion_min} min</span>
       </div>
@@ -502,6 +533,8 @@ function renderLeccion(id){
           <button class="yt-btn" id="yt-toggle">${ICON.play}</button>
           <div class="yt-seek" id="yt-seek"><div class="yt-seek-fill" id="yt-seek-fill"></div></div>
           <span class="yt-time" id="yt-time">0:00 / 0:00</span>
+          <button class="yt-btn yt-cc" id="yt-cc" title="Subtítulos">CC</button>
+          <button class="yt-btn yt-speed" id="yt-speed" title="Velocidad de reproducción">1×</button>
           <button class="yt-btn" id="yt-fs" title="Pantalla completa">${ICON.fs}</button>
         </div>
       ` : `<div class="pending">Este video todavía no se cargó. Si el founder ya lo grabó, va a aparecer acá pronto.</div>`}
@@ -542,6 +575,29 @@ function renderLeccion(id){
     $('#yt-fs').onclick = () => {
       const el = document.getElementById('player-wrap');
       if (el?.requestFullscreen) el.requestFullscreen();
+    };
+
+    let ccOn = false;
+    $('#yt-cc').onclick = () => {
+      if (!ytPlayer) return;
+      ccOn = !ccOn;
+      if (ccOn){
+        ytPlayer.loadModule?.('captions');
+        ytPlayer.setOption?.('captions', 'track', {});
+      } else {
+        ytPlayer.unloadModule?.('captions');
+      }
+      $('#yt-cc').classList.toggle('on', ccOn);
+    };
+
+    const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
+    let speedIdx = 1;
+    $('#yt-speed').onclick = () => {
+      if (!ytPlayer) return;
+      speedIdx = (speedIdx + 1) % SPEEDS.length;
+      const rate = SPEEDS[speedIdx];
+      ytPlayer.setPlaybackRate(rate);
+      $('#yt-speed').textContent = rate + '×';
     };
   } else {
     destroyPlayer();
@@ -754,12 +810,14 @@ async function renderAdmin(){
     </table>
   </div>`;
 
-  html += `<div class="box"><h3>Cargar videos (YouTube)</h3><p class="d">Subí el video como <b>no listado</b> en YouTube, copiá el ID de la URL (lo que va después de <code>v=</code>) y pegalo acá.</p>
-    <table class="admin"><tr><th>#</th><th>Título</th><th>YouTube ID</th><th></th></tr>
+  html += `<div class="box"><h3>Cargar videos (YouTube)</h3><p class="d">Subí el video como <b>no listado</b> en YouTube, copiá el ID de la URL (lo que va después de <code>v=</code>) y pegalo acá. Al guardar, si tenés la API key de YouTube configurada, la duración se sincroniza sola con la real del video.</p>
+    ${YOUTUBE_API_KEY ? `<button id="btn-sync-all" style="margin-bottom:14px">Sincronizar todas las duraciones con YouTube</button>` : `<p class="d" style="margin:0 0 14px;color:var(--warn)">Falta configurar YOUTUBE_API_KEY en el archivo para poder sincronizar duraciones — ver "Cómo desplegar.html".</p>`}
+    <table class="admin"><tr><th>#</th><th>Título</th><th>YouTube ID</th><th>Duración</th><th></th></tr>
     ${state.lecciones.map(l => `<tr data-lid="${l.id}">
       <td class="mono">${l.numero}</td>
       <td>${l.titulo}</td>
       <td><input value="${l.youtube_id||''}" placeholder="dQw4w9WgXcQ"></td>
+      <td class="mono" id="dur-${l.id}">${l.duracion_min} min</td>
       <td><button data-save="${l.id}">Guardar</button></td>
     </tr>`).join('')}
     </table>
@@ -812,10 +870,44 @@ async function renderAdmin(){
     const id = btn.dataset.save;
     const input = btn.closest('tr').querySelector('input');
     const val = input.value.trim();
-    await sb.from('lecciones').update({ youtube_id: val || null }).eq('id', id);
+    const update = { youtube_id: val || null };
+    let duracionNueva = null;
+    if (val && YOUTUBE_API_KEY){
+      btn.disabled = true; btn.textContent = 'Sincronizando…';
+      duracionNueva = await fetchDuracionReal(val);
+      if (duracionNueva) update.duracion_min = duracionNueva;
+    }
+    await sb.from('lecciones').update(update).eq('id', id);
     const l = state.lecciones.find(x => x.id === id);
-    if (l) l.youtube_id = val || null;
-    toast('Video actualizado');
+    if (l){
+      l.youtube_id = val || null;
+      if (duracionNueva) l.duracion_min = duracionNueva;
+    }
+    const durCell = document.getElementById('dur-'+id);
+    if (durCell && l) durCell.textContent = l.duracion_min + ' min';
+    btn.disabled = false; btn.textContent = 'Guardar';
+    toast(duracionNueva ? `Video actualizado — duración real: ${duracionNueva} min` : val && YOUTUBE_API_KEY ? 'Video actualizado (no se pudo leer la duración)' : 'Video actualizado');
+  });
+
+  $('#btn-sync-all')?.addEventListener('click', async () => {
+    const btn = $('#btn-sync-all');
+    const conId = state.lecciones.filter(l => l.youtube_id);
+    if (!conId.length){ toast('Todavía no hay videos cargados'); return; }
+    btn.disabled = true;
+    let hechos = 0;
+    for (const l of conId){
+      btn.textContent = `Sincronizando ${++hechos}/${conId.length}…`;
+      const dur = await fetchDuracionReal(l.youtube_id);
+      if (dur && dur !== l.duracion_min){
+        await sb.from('lecciones').update({ duracion_min: dur }).eq('id', l.id);
+        l.duracion_min = dur;
+        const durCell = document.getElementById('dur-'+l.id);
+        if (durCell) durCell.textContent = dur + ' min';
+      }
+    }
+    btn.disabled = false;
+    btn.textContent = 'Sincronizar todas las duraciones con YouTube';
+    toast(`Listo — ${hechos} videos revisados`);
   });
 
   $('#btn-add-recurso').onclick = async () => {
