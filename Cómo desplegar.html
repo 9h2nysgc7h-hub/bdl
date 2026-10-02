@@ -69,6 +69,9 @@ li{margin-bottom:6px}
 <div class="paso">Pegá la clave en <code>index.html</code>, en la línea <code>YOUTUBE_API_KEY</code> (al lado de las de Supabase).</div>
 <p>Con esto, cada vez que guardás un YouTube ID en Admin, la duración se sincroniza sola con la real del video — ya no con la estimación del guion. También hay un botón "Sincronizar todas las duraciones" para corregir de una los videos que ya habías cargado antes de este paso. Es gratis: la cuota diaria gratuita de Google alcanza de sobra para esto (una consulta por video, no por cada vez que alguien lo mira).</p>
 
+<h2>Miniaturas propias</h2>
+<p>Si no subís nada, cada lección usa la miniatura automática de YouTube. Para poner la tuya (por ejemplo las que ya tenés en <code>Desktop/Miniaturas/</code>), andá a <b>Admin → Miniaturas</b>, elegí el archivo de imagen para esa lección y listo — se guarda sola en Supabase Storage, gratis (1GB incluidos, de sobra para esto).</p>
+
 <h2>Recursos por lección</h2>
 <p>Debajo de cada video podés dejar el entregable, un link a un documento o lo que haga falta. Se carga desde <b>Admin → Recursos por lección</b> — elegís la lección, le ponés un título y, si aplica, un link (el link es opcional: sin él queda como una nota de texto suelta). Aparece al toque para quien tenga esa semana desbloqueada.</p>
 
@@ -77,6 +80,7 @@ li{margin-bottom:6px}
 <br>1. <code>migracion-desbloqueo-manual.sql</code> — agrega el desbloqueo manual por semana.
 <br>2. <code>migracion-registro-aprobacion.sql</code> — agrega el registro público y la aprobación de miembros.
 <br>3. <code>migracion-recursos.sql</code> — agrega los recursos por lección.
+<br>4. <code>migracion-miniaturas.sql</code> — agrega las miniaturas propias.
 <br>Ninguno toca lo que ya tenés cargado, y no hace falta volver a correr <code>seed.sql</code>.</div>
 
 </div>

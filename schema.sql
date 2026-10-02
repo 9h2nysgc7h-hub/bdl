@@ -86,6 +86,7 @@ create table if not exists lecciones (
   duracion_min int not null,
   tipo text not null default 'video' check (tipo in ('video','entregable')),
   youtube_id text,                     -- se carga a medida que grabás (panel admin)
+  miniatura_url text,                  -- opcional: miniatura propia subida desde Admin
   orden int not null
 );
 
@@ -183,6 +184,20 @@ create policy "cargar propio cierre" on cierre for insert
   with check (auth.uid() = alumno_id);
 create policy "editar propio cierre" on cierre for update
   using (auth.uid() = alumno_id);
+
+-- ---------- STORAGE: miniaturas propias ----------
+insert into storage.buckets (id, name, public)
+values ('miniaturas', 'miniaturas', true)
+on conflict (id) do nothing;
+
+alter table storage.objects enable row level security;
+
+create policy "staff sube miniaturas" on storage.objects for insert
+  with check (bucket_id = 'miniaturas' and es_staff());
+create policy "staff actualiza miniaturas" on storage.objects for update
+  using (bucket_id = 'miniaturas' and es_staff());
+create policy "staff borra miniaturas" on storage.objects for delete
+  using (bucket_id = 'miniaturas' and es_staff());
 
 -- ============================================================
 -- LISTO en SQL. Seguí con seed.sql. Después, en el dashboard (no en
