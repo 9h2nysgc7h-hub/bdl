@@ -190,7 +190,12 @@ insert into storage.buckets (id, name, public)
 values ('miniaturas', 'miniaturas', true)
 on conflict (id) do nothing;
 
-alter table storage.objects enable row level security;
+-- No hace falta habilitar RLS acá: storage.objects ya la trae activada
+-- de fábrica en Supabase, y el rol del SQL Editor no es dueño de esa
+-- tabla para poder tocarla (tiraría "must be owner of table objects").
+
+create policy "ver miniaturas" on storage.objects for select
+  using (bucket_id = 'miniaturas');
 
 create policy "staff sube miniaturas" on storage.objects for insert
   with check (bucket_id = 'miniaturas' and es_staff());
