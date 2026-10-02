@@ -1,0 +1,64 @@
+<meta charset="utf-8">
+<title>Cómo desplegar · Plataforma BDL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+:root{--page-bg:#FFFFFF;--ink:#1A1A1A;--muted:#444444;--line:#E4E4E4;--accent:#2E5A70}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page-bg);color:var(--ink)}
+.doc{max-width:740px;margin:0 auto;padding:64px 56px 100px;font-family:Arial,Helvetica,"Segoe UI",sans-serif;font-size:16px;line-height:1.7}
+h1.deco{font-family:'Permanent Marker',cursive;color:var(--accent);font-size:34px;font-weight:400;margin:0 0 6px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 30px}
+h2{font-size:20px;margin:40px 0 10px}
+.paso{background:#FAFAFA;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:16px 20px;margin:0 0 16px}
+.paso b{display:block;margin-bottom:4px}
+code{background:#F4F4F4;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:14px}
+.warn{background:#FFF8F0;border:1px solid #E0C4B0;border-radius:6px;padding:16px 20px;margin:20px 0}
+ul{padding-left:22px}
+li{margin-bottom:6px}
+</style>
+<div class="doc">
+
+<h1 class="deco">Cómo desplegar la plataforma</h1>
+<p class="eyebrow">Plataforma BDL · gratis de punta a punta</p>
+
+<p>Mismo stack que ya usás en el CRM de Nave: <b>Supabase</b> (login + base de datos) + <b>YouTube no listado</b> (video) + <b>Vercel</b> (hosting). Los tres son gratis para este volumen de alumnos — no hay ningún paso pago acá.</p>
+
+<h2>1 · Crear el proyecto en Supabase</h2>
+<div class="paso"><b>supabase.com → New project</b> (plan gratis). Guardá la contraseña de la base que te pide, no hace falta para esto pero por las dudas.</div>
+
+<h2>2 · Cargar la base de datos</h2>
+<div class="paso"><b>SQL Editor → New query</b> → pegá <b>todo</b> el contenido de <code>schema.sql</code> → Run.</div>
+<div class="paso"><b>Después, otra query nueva</b> → pegá <b>todo</b> el contenido de <code>seed.sql</code> → Run. Esto carga los 11 módulos y las 83 lecciones reales, sin video todavía.</div>
+
+<h2>3 · Activar logins sin confirmación por mail</h2>
+<div class="paso">Como los accesos los das vos a mano (no hay registro público), cuando crees cada usuario en el paso 5 tildá <b>"Auto Confirm User"</b> — así entra directo con la contraseña que le diste, sin tener que click-ear un mail de confirmación.</div>
+
+<h2>4 · Conectar el archivo con tu proyecto</h2>
+<div class="paso"><b>Project Settings → API</b> → copiá <b>Project URL</b> y <b>anon public key</b>. Abrí <code>index.html</code>, buscá las líneas <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> cerca del principio del <code>&lt;script&gt;</code>, y pegalos ahí.</div>
+
+<h2>5 · Crear tu propio acceso como founder</h2>
+<div class="paso"><b>Authentication → Users → Add user</b> → tu email + una contraseña, con "Auto Confirm User" tildado.</div>
+<div class="paso">Después, en <b>SQL Editor</b>, correr (reemplazando el email):
+<br><code>update profiles set rol='founder' where id = (select id from auth.users where email='tu-email@gmail.com');</code>
+<br>Con eso ves el panel Admin al entrar.</div>
+
+<h2>6 · Subir a Vercel</h2>
+<div class="paso">Mismo flujo que ya conocés del CRM: creás el proyecto en Vercel y subís la carpeta <code>Plataforma BDL</code> (con el <code>index.html</code> ya configurado). Te da una URL tipo <code>bdl-plataforma.vercel.app</code>.</div>
+
+<h2>7 · Dar de alta a cada alumno</h2>
+<div class="paso"><b>Authentication → Add user</b> (con "Auto Confirm User" tildado) con el email y una contraseña provisoria que le pasás vos. El perfil se crea solo, arranca en Semana 0 (la única abierta por defecto).</div>
+
+<h2>8 · Cargar cada video a medida que lo grabás</h2>
+<div class="paso">Subís el video a YouTube como <b>No listado</b> (no público, no aparece en búsquedas — solo entra quien tiene el link). Copiás el ID de la URL: en <code>youtube.com/watch?v=dQw4w9WgXcQ</code> el ID es <code>dQw4w9WgXcQ</code>. Entrás a la plataforma logueado como founder → <b>Admin</b> → pegás el ID en la fila de esa lección → Guardar. Aparece al toque para todos los alumnos que ya tengan ese módulo desbloqueado.</div>
+
+<div class="warn">
+<b>El trade-off real de que sea gratis:</b> "no listado" en YouTube no es lo mismo que privado — nadie lo encuentra buscando, pero si un alumno copia el link y se lo pasa a alguien de afuera, esa persona sí puede verlo. Para un programa de $2.000 con pocos alumnos por camada, es un riesgo bajo y es el mismo trade-off que acepta la enorme mayoría de cursos chicos. Si en algún momento esto crece y te preocupa de verdad, el salto siguiente es un hosting de video pago con protección real (Vimeo privado o Cloudflare Stream) — no hace falta ahora.
+</div>
+
+<h2>Desbloqueo semanal — es manual, lo hacés vos</h2>
+<p>Cada alumno arranca viendo solo la Semana 0. Cuando termina una semana y su entregable, toca <b>"Avisar que terminé"</b> dentro de la plataforma — vos ves ese pedido apenas entrás a <b>Admin</b>, en la sección "Pedidos de desbloqueo", con un botón para desbloquearle la semana siguiente. También podés adelantar o corregir la semana de cualquiera a mano, sin esperar su pedido, desde la tabla de Alumnos en el mismo panel.</p>
+
+<h2>Si ya tenías el proyecto armado antes de este cambio</h2>
+<div class="paso">Corré <code>migracion-desbloqueo-manual.sql</code> en el SQL Editor (una sola vez) — agrega las columnas nuevas sin tocar nada de lo que ya cargaste. No hace falta volver a correr <code>seed.sql</code>.</div>
+
+</div>

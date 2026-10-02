@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BDL — Bastión De Líderes</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1A24; --bg-2:#16283A; --card:#132232; --line:#26394D;
+  --gold:#C9A227; --gold-deep:#8B6A1B; --gold-soft:#E4C766;
+  --ink:#F4EEE4; --muted:#9FB0BE; --faint:#5E7183;
+  --ok:#3FA66B; --warn:#E08A6E;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit}
+.hidden{display:none !important}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 24px 90px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.icon{width:16px;height:16px;flex:none;display:block}
+.icon.sm{width:12px;height:12px}
+
+/* ---- header ---- */
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(14,26,36,.92);backdrop-filter:blur(8px);z-index:10}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand svg{width:28px;height:auto;flex:none}
+.brand b{font-family:'Archivo Black';font-size:17px;letter-spacing:.01em;font-weight:400}
+.brand b em{font-style:normal;color:var(--gold-soft)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-link{font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:color .15s}
+.nav-link:hover{color:var(--ink)}
+.ring{position:relative;width:38px;height:38px}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:10px;color:var(--gold-soft)}
+
+/* ---- buttons / inputs ---- */
+button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px;font-size:13.5px;transition:border-color .15s,background .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover{border-color:var(--gold)}
+button.primary{background:var(--gold);border-color:var(--gold);color:#1A1406;font-weight:600}
+button.primary:hover{background:var(--gold-soft);border-color:var(--gold-soft)}
+button:disabled{opacity:.5;cursor:default}
+input,textarea{font:inherit;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:10px 12px;width:100%}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.03em}
+.field{margin-bottom:16px}
+
+/* ---- login ---- */
+.login-box{max-width:380px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:40px 34px;box-shadow:0 20px 50px -20px rgba(0,0,0,.5)}
+.login-box .crest{display:flex;justify-content:center;margin-bottom:20px}
+.login-box .crest svg{width:56px;height:auto}
+.login-box h1{font-family:'Archivo Black';font-size:19px;font-weight:400;text-align:center;margin:0 0 6px;text-wrap:balance}
+.login-box p.sub{font-size:13px;color:var(--muted);text-align:center;margin:0 0 30px;line-height:1.5}
+.err{color:var(--warn);font-size:13px;margin-top:10px}
+
+/* ---- tabs de semana ---- */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:26px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:12px;font-family:'IBM Plex Mono';white-space:nowrap}
+.tab:hover{border-color:var(--gold-soft);color:var(--ink)}
+.tab.actual{background:var(--gold);border-color:var(--gold);color:#1A1406;font-weight:600}
+.tab.pasado{border-color:var(--gold-deep);color:var(--gold-soft)}
+.tab.bloqueado{color:var(--faint)}
+.tab .icon{color:inherit}
+
+/* ---- dashboard ---- */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 28px;margin-bottom:22px;flex-wrap:wrap}
+.hero h2{font-family:'Archivo Black';font-size:19px;font-weight:400;margin:0 0 4px}
+.hero p{margin:0;color:var(--muted);font-size:13px}
+.hero-ring{width:60px;height:60px;position:relative;flex:none}
+.hero-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:14px;color:var(--gold-soft);font-weight:600}
+
+.modulo{margin:0 0 38px;scroll-margin-top:84px}
+.modulo-head{display:flex;align-items:center;gap:12px;margin:0 0 8px}
+.modulo-head .num{font-family:'IBM Plex Mono';color:var(--gold-soft);font-size:11.5px;letter-spacing:.04em}
+.modulo-head h3{font-size:15.5px;margin:0;font-weight:600}
+.modulo-head .meta{margin-left:auto;font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:5px}
+.modulo-bar{height:3px;background:var(--line);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.modulo-bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.card.locked{cursor:default;opacity:.5}
+.card.locked:hover{border-color:var(--line);transform:none}
+.thumb{aspect-ratio:16/9;background:linear-gradient(145deg,var(--bg-2),var(--card) 70%);display:flex;align-items:flex-end;justify-content:flex-start;position:relative;padding:12px}
+.thumb .num-big{font-family:'IBM Plex Mono';font-size:13px;color:var(--faint);letter-spacing:.03em}
+.thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.55);font-size:10px;padding:3px 7px;border-radius:4px;font-family:'IBM Plex Mono';color:var(--ink)}
+.thumb .state{position:absolute;left:8px;top:8px;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff}
+.thumb .state.ok{background:var(--ok)}
+.card-body{padding:12px 14px}
+.card-body .tit{font-size:13px;font-weight:600;line-height:1.35;margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-body .sub{font-size:10.5px;color:var(--faint);letter-spacing:.03em;margin:0}
+
+.desbloqueo-box{margin-top:14px;background:var(--bg-2);border:1px dashed var(--gold-deep);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.desbloqueo-box p{margin:0;font-size:13px;color:var(--muted)}
+.desbloqueo-box.espera{border-style:solid;border-color:var(--line)}
+
+/* ---- lección ---- */
+.leccion-top{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;color:var(--muted)}
+.leccion-top a:hover{color:var(--ink)}
+.player{aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line);position:relative}
+.player iframe{width:100%;height:100%;border:0;pointer-events:none}
+.player .pending{height:100%;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:14px;text-align:center;padding:20px}
+#yt-mount{width:100%;height:100%}
+.yt-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);cursor:pointer}
+.yt-big-play{width:60px;height:60px;border-radius:50%;background:rgba(201,162,39,.94);border:0;color:#1A1406;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.yt-big-play svg{width:22px;height:22px;margin-left:3px}
+.yt-controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
+.yt-btn{background:transparent;border:0;color:var(--ink);padding:4px;min-width:0}
+.yt-btn:hover{color:var(--gold-soft);border-color:transparent}
+.yt-btn svg{width:16px;height:16px}
+.yt-time{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink);white-space:nowrap}
+.yt-seek{flex:1;height:4px;background:rgba(255,255,255,.25);border-radius:2px;cursor:pointer;position:relative}
+.yt-seek-fill{height:100%;background:var(--gold);border-radius:2px;width:0%}
+.leccion-actions{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.leccion-nav{display:flex;justify-content:space-between;margin-top:26px;gap:12px}
+
+/* ---- perfil ---- */
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:20px}
+.box h3{font-family:'Archivo Black';font-size:15px;font-weight:400;margin:0 0 4px}
+.box p.d{color:var(--muted);font-size:13px;margin:0 0 18px;line-height:1.5}
+.foto-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:600px){.foto-grid{grid-template-columns:1fr 1fr}}
+.foto-stat{background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:14px}
+.foto-stat .l{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.foto-stat .v{font-family:'IBM Plex Mono';font-size:17px;color:var(--gold-soft)}
+.foto-stat .delta{font-size:11.5px;margin-top:4px}
+.foto-stat .delta.up{color:var(--ok)}
+.foto-stat .delta.down{color:var(--warn)}
+
+/* ---- admin ---- */
+table.admin{width:100%;border-collapse:collapse;font-size:13px}
+table.admin th{text-align:left;color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.admin td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.admin input{padding:6px 8px;font-size:12.5px}
+.tag-rol{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--bg-2);color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1A1406;padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:600;z-index:50;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+
+.config-warn{max-width:560px;margin:14vh auto;background:var(--card);border:1px solid var(--gold-deep);border-radius:10px;padding:26px 30px;font-size:14px;line-height:1.6}
+.config-warn code{background:var(--bg-2);padding:2px 6px;border-radius:4px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div id="config-warn" class="hidden">
+  <div class="config-warn">
+    <h3 style="font-family:'Archivo Black';margin:0 0 10px">Falta configurar Supabase</h3>
+    <p>Abrí este archivo y completá <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> al principio del <code>&lt;script&gt;</code>, con los datos de tu proyecto (Supabase → Project Settings → API). Después corré <code>schema.sql</code> y <code>seed.sql</code> en el SQL Editor.</p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="brand" data-nav="#/">
+      <svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E4C766"/><stop offset="100%" stop-color="#8B6A1B"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g1)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#132232" stroke="url(#g1)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F4EEE4">BDL</text></svg>
+      <b>BDL — Bastión De <em>Líderes</em></b>
+    </div>
+    <div class="nav-right">
+      <a class="nav-link" data-nav="#/perfil">Tu progreso</a>
+      <a class="nav-link hidden" id="nav-admin" data-nav="#/admin">Admin</a>
+      <a class="nav-link" id="nav-logout">Salir</a>
+      <div class="ring">
+        <svg width="38" height="38" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="16" fill="none" stroke="#26394D" stroke-width="4"/>
+          <circle id="ring-progress" cx="20" cy="20" r="16" fill="none" stroke="#C9A227" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round"/>
+        </svg>
+        <span class="pct" id="ring-pct">0%</span>
+      </div>
+    </div>
+  </header>
+  <div class="wrap" id="view"></div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+// ============================================================
+// CONFIGURÁ ESTO con los datos de tu proyecto Supabase
+// (Project Settings → API). Ver "Cómo desplegar.html".
+// ============================================================
+const SUPABASE_URL = 'https://uboptojhywisxjokaljv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib3B0b2poeXdpc3hqb2thbGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MDU4NjMsImV4cCI6MjEwNjQ4MTg2M30.gQhnWBCQPeRsKLeVzZkMD6wIKLaoCL-6b0-tsbHoZuY';
+// ============================================================
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  document.getElementById('config-warn').classList.remove('hidden');
+  throw new Error('Falta configurar Supabase');
+}
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ICON = {
+  lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  play: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`,
+  pause: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>`,
+  fs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`,
+};
+
+let state = {
+  user: null,
+  profile: null,
+  modulos: [],
+  lecciones: [],
+  progreso: new Set(),   // ids de leccion completados
+  diagnostico: null,
+  cierre: null,
+};
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+const view = $('#view');
+
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+// El desbloqueo es manual: cada alumno tiene profile.modulo_actual (el número
+// de semana más alto al que llegó). El founder lo sube a mano desde Admin
+// cuando el alumno le avisa que terminó la semana y el entregable.
+function moduloDesbloqueado(modulo){
+  if (!state.profile) return false;
+  if (state.profile.rol === 'founder') return true;
+  return modulo.numero <= state.profile.modulo_actual;
+}
+
+// ---------- carga de datos ----------
+async function cargarDatosBase(){
+  const [{data: modulos}, {data: lecciones}, {data: progreso}] = await Promise.all([
+    sb.from('modulos').select('*').order('orden'),
+    sb.from('lecciones').select('*').order('orden'),
+    sb.from('progreso').select('leccion_id').eq('alumno_id', state.user.id),
+  ]);
+  state.modulos = modulos || [];
+  state.lecciones = lecciones || [];
+  state.progreso = new Set((progreso||[]).map(p => p.leccion_id));
+
+  const [{data: diag}, {data: cie}] = await Promise.all([
+    sb.from('diagnostico').select('*').eq('alumno_id', state.user.id).maybeSingle(),
+    sb.from('cierre').select('*').eq('alumno_id', state.user.id).maybeSingle(),
+  ]);
+  state.diagnostico = diag || null;
+  state.cierre = cie || null;
+
+  actualizarAnilloGlobal();
+}
+
+function actualizarAnilloGlobal(){
+  const total = state.lecciones.length || 1;
+  const hechas = state.progreso.size;
+  const pct = Math.round((hechas/total)*100);
+  $('#ring-pct').textContent = pct + '%';
+  const circ = 100.5;
+  $('#ring-progress').setAttribute('stroke-dashoffset', circ - (circ*pct/100));
+}
+
+// ---------- router ----------
+async function route(){
+  const hash = location.hash || '#/';
+  if (!state.user){
+    renderLogin();
+    return;
+  }
+  if (!hash.startsWith('#/leccion/')) destroyPlayer();
+  if (hash === '#/' ) renderDashboard();
+  else if (hash.startsWith('#/leccion/')) renderLeccion(hash.split('/')[2]);
+  else if (hash === '#/perfil') renderPerfil();
+  else if (hash === '#/admin') renderAdmin();
+  else renderDashboard();
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('click', (e) => {
+  const nav = e.target.closest('[data-nav]');
+  if (nav){ location.hash = nav.dataset.nav; }
+});
+
+// ---------- login ----------
+function renderLogin(){
+  $('#app').classList.add('hidden');
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="login-screen" class="login-box">
+      <div class="crest"><svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E4C766"/><stop offset="100%" stop-color="#8B6A1B"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g2)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#132232" stroke="url(#g2)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F4EEE4">BDL</text></svg></div>
+      <h1>Bastión De Líderes</h1>
+      <p class="sub">Tu acceso te lo da el founder. Si no tenés usuario todavía, escribile.</p>
+      <div class="field"><label>Email</label><input id="li-email" type="email" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input id="li-pass" type="password" autocomplete="current-password"></div>
+      <button class="primary" style="width:100%" id="li-submit">Entrar</button>
+      <div class="err hidden" id="li-err"></div>
+    </div>
+  `);
+  $('#li-submit').onclick = async () => {
+    const email = $('#li-email').value.trim();
+    const password = $('#li-pass').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      $('#li-err').textContent = 'No pudimos entrar: ' + error.message;
+      $('#li-err').classList.remove('hidden');
+    }
+  };
+}
+
+function removeLoginScreen(){
+  const el = document.getElementById('login-screen');
+  if (el) el.remove();
+}
+
+// ---------- dashboard ----------
+function renderDashboard(){
+  const total = state.lecciones.length || 1;
+  const hechas = state.progreso.size;
+  const pct = Math.round((hechas/total)*100);
+  const esFounder = state.profile.rol === 'founder';
+
+  let html = `
+    <div class="hero">
+      <div>
+        <h2>Hola, ${state.profile.nombre}</h2>
+        <p>${hechas} de ${total} lecciones completadas${esFounder ? '' : ` · estás en la Semana ${state.profile.modulo_actual}`}</p>
+      </div>
+      <div class="hero-ring">
+        <svg width="60" height="60" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#26394D" stroke-width="6"/>
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#C9A227" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="${2*Math.PI*27}" stroke-dashoffset="${2*Math.PI*27 - (2*Math.PI*27*pct/100)}"
+            transform="rotate(-90 32 32)"/>
+        </svg>
+        <span class="pct">${pct}%</span>
+      </div>
+    </div>
+  `;
+
+  html += `<div class="tabs">` + state.modulos.map(m => {
+    const cls = esFounder ? 'pasado' : m.numero === state.profile.modulo_actual ? 'actual' : m.numero < state.profile.modulo_actual ? 'pasado' : 'bloqueado';
+    const icon = cls === 'pasado' ? ICON.check : cls === 'bloqueado' ? ICON.lock : '';
+    return `<button class="tab ${cls}" data-jump="modulo-${m.numero}">${icon ? `<span class="icon sm">${icon}</span>` : ''}Semana ${m.numero}</button>`;
+  }).join('') + `</div>`;
+
+  for (const modulo of state.modulos){
+    const lecs = state.lecciones.filter(l => l.modulo_id === modulo.id);
+    const desbloqueado = moduloDesbloqueado(modulo);
+    const hechasModulo = lecs.filter(l => state.progreso.has(l.id)).length;
+    const pctModulo = lecs.length ? Math.round((hechasModulo/lecs.length)*100) : 0;
+    const esActual = !esFounder && modulo.numero === state.profile.modulo_actual;
+    const todasCompletas = lecs.length > 0 && hechasModulo === lecs.length;
+
+    html += `<div class="modulo" id="modulo-${modulo.numero}">
+      <div class="modulo-head">
+        <span class="num mono">SEMANA ${modulo.numero}</span>
+        <h3>${modulo.titulo}</h3>
+        <span class="meta">${desbloqueado ? `${hechasModulo}/${lecs.length}` : `<span class="icon sm">${ICON.lock}</span> bloqueada`}</span>
+      </div>
+      <div class="modulo-bar"><div class="modulo-bar-fill" style="width:${desbloqueado ? pctModulo : 0}%"></div></div>
+      <div class="grid">
+        ${lecs.map(l => cardLeccion(l, desbloqueado)).join('')}
+      </div>
+      ${esActual && todasCompletas ? (
+        state.profile.pidio_desbloqueo
+          ? `<div class="desbloqueo-box espera"><p>Ya le avisaste al founder — esperando que te desbloquee la Semana ${modulo.numero+1}.</p></div>`
+          : `<div class="desbloqueo-box"><p>Terminaste esta semana y el entregable. Avisale al founder para que te desbloquee la próxima.</p><button class="primary" id="btn-avisar">Avisar que terminé</button></div>`
+      ) : ''}
+    </div>`;
+  }
+
+  view.innerHTML = html;
+  $$('.card[data-id]').forEach(c => c.onclick = () => {
+    if (c.classList.contains('locked')) return;
+    location.hash = '#/leccion/' + c.dataset.id;
+  });
+  $$('.tab[data-jump]').forEach(t => t.onclick = () => {
+    document.getElementById(t.dataset.jump)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  const btnAvisar = $('#btn-avisar');
+  if (btnAvisar) btnAvisar.onclick = async () => {
+    await sb.from('profiles').update({ pidio_desbloqueo: true }).eq('id', state.user.id);
+    state.profile.pidio_desbloqueo = true;
+    toast('Le avisamos al founder');
+    renderDashboard();
+  };
+}
+
+function cardLeccion(l, desbloqueado){
+  const completado = state.progreso.has(l.id);
+  return `
+    <div class="card ${desbloqueado ? '' : 'locked'}" data-id="${l.id}">
+      <div class="thumb">
+        <span class="num-big mono">${l.numero}</span>
+        ${!desbloqueado ? `<div class="state">${iconSm(ICON.lock)}</div>` : completado ? `<div class="state ok">${iconSm(ICON.check)}</div>` : ''}
+        <span class="dur">${l.duracion_min} min</span>
+      </div>
+      <div class="card-body">
+        <p class="tit">${l.titulo}</p>
+        <p class="sub">${l.tipo === 'entregable' ? 'ENTREGABLE' : 'LECCIÓN'}</p>
+      </div>
+    </div>`;
+}
+function iconSm(svg){ return `<span class="icon sm">${svg}</span>`; }
+
+// ---------- lección ----------
+function renderLeccion(id){
+  const l = state.lecciones.find(x => x.id === id);
+  if (!l){ location.hash = '#/'; return; }
+  const modulo = state.modulos.find(m => m.id === l.modulo_id);
+  if (!moduloDesbloqueado(modulo)){ location.hash = '#/'; return; }
+
+  const idx = state.lecciones.findIndex(x => x.id === id);
+  const prev = state.lecciones[idx-1];
+  const next = state.lecciones[idx+1];
+  const completado = state.progreso.has(l.id);
+
+  view.innerHTML = `
+    <div class="leccion-top"><a data-nav="#/" style="cursor:pointer">← Volver</a><span>·</span><span>Semana ${modulo.numero} — ${modulo.titulo}</span></div>
+    <h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 4px">${l.numero} — ${l.titulo}</h2>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 18px">${l.duracion_min} min</p>
+    <div class="player" id="player-wrap" oncontextmenu="return false">
+      ${l.youtube_id ? `
+        <div id="yt-mount"></div>
+        <div class="yt-overlay" id="yt-overlay"><button class="yt-big-play" id="yt-big-play" aria-label="Reproducir">${ICON.play}</button></div>
+        <div class="yt-controls" id="yt-controls">
+          <button class="yt-btn" id="yt-toggle">${ICON.play}</button>
+          <div class="yt-seek" id="yt-seek"><div class="yt-seek-fill" id="yt-seek-fill"></div></div>
+          <span class="yt-time" id="yt-time">0:00 / 0:00</span>
+          <button class="yt-btn" id="yt-fs" title="Pantalla completa">${ICON.fs}</button>
+        </div>
+      ` : `<div class="pending">Este video todavía no se cargó. Si el founder ya lo grabó, va a aparecer acá pronto.</div>`}
+    </div>
+    <div class="leccion-actions">
+      <button class="primary" id="btn-completar" ${completado ? 'disabled' : ''}>${completado ? 'Completada' : 'Marcar como completada'}</button>
+    </div>
+    <div class="leccion-nav">
+      <button ${prev ? '' : 'disabled'} id="btn-prev">← Anterior</button>
+      <button ${next ? '' : 'disabled'} id="btn-next">Siguiente →</button>
+    </div>
+  `;
+
+  $('#btn-completar').onclick = async () => {
+    await sb.from('progreso').insert({ alumno_id: state.user.id, leccion_id: l.id });
+    state.progreso.add(l.id);
+    actualizarAnilloGlobal();
+    renderLeccion(id);
+    toast('Lección marcada como completada');
+  };
+  if (prev) $('#btn-prev').onclick = () => location.hash = '#/leccion/' + prev.id;
+  if (next) $('#btn-next').onclick = () => location.hash = '#/leccion/' + next.id;
+
+  if (l.youtube_id){
+    mountPlayer(l.youtube_id);
+    $('#yt-overlay').onclick = () => ytPlayer && ytPlayer.playVideo();
+    $('#yt-toggle').onclick = () => {
+      if (!ytPlayer || !ytPlayer.getPlayerState) return;
+      ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+    };
+    $('#yt-seek').onclick = (ev) => {
+      if (!ytPlayer || !ytPlayer.getDuration) return;
+      const rect = ev.currentTarget.getBoundingClientRect();
+      const pct = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
+      ytPlayer.seekTo((ytPlayer.getDuration()||0) * pct, true);
+    };
+    $('#yt-fs').onclick = () => {
+      const el = document.getElementById('player-wrap');
+      if (el?.requestFullscreen) el.requestFullscreen();
+    };
+  } else {
+    destroyPlayer();
+  }
+}
+
+// ---------- reproductor propio sobre la API de YouTube ----------
+// controls:0 oculta toda la interfaz nativa de YouTube (título, logo,
+// link "mirar en YouTube") — los controles de abajo son nuestros.
+let ytApiReady = !!(window.YT && window.YT.Player);
+let ytApiQueue = [];
+let ytPlayer = null;
+let ytProgressTimer = null;
+
+(function loadYouTubeApi(){
+  if (ytApiReady || document.getElementById('yt-iframe-api')) return;
+  const tag = document.createElement('script');
+  tag.id = 'yt-iframe-api';
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+window.onYouTubeIframeAPIReady = () => {
+  ytApiReady = true;
+  ytApiQueue.forEach(fn => fn());
+  ytApiQueue = [];
+};
+
+function destroyPlayer(){
+  if (ytProgressTimer){ clearInterval(ytProgressTimer); ytProgressTimer = null; }
+  if (ytPlayer?.destroy){ try{ ytPlayer.destroy(); }catch(e){} }
+  ytPlayer = null;
+}
+
+function mountPlayer(youtubeId){
+  destroyPlayer();
+  const run = () => {
+    if (!document.getElementById('yt-mount')) return; // navegó a otra vista antes de que cargue la API
+    ytPlayer = new YT.Player('yt-mount', {
+      videoId: youtubeId,
+      host: 'https://www.youtube-nocookie.com',
+      playerVars: { controls:0, rel:0, modestbranding:1, iv_load_policy:3, disablekb:1, playsinline:1, fs:0 },
+      events: { onReady: fmtTime, onStateChange: onPlayerState },
+    });
+  };
+  ytApiReady ? run() : ytApiQueue.push(run);
+}
+
+function fmt(s){
+  s = Math.floor(s||0);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+function fmtTime(){
+  if (!ytPlayer?.getDuration) return;
+  const dur = ytPlayer.getDuration()||0, cur = ytPlayer.getCurrentTime?.()||0;
+  const t = $('#yt-time'); if (t) t.textContent = fmt(cur) + ' / ' + fmt(dur);
+  const fill = $('#yt-seek-fill'); if (fill) fill.style.width = (dur ? cur/dur*100 : 0) + '%';
+}
+function onPlayerState(e){
+  const overlay = $('#yt-overlay'), toggle = $('#yt-toggle');
+  if (e.data === 1){ // playing
+    overlay?.classList.add('hidden');
+    if (toggle) toggle.innerHTML = ICON.pause;
+    clearInterval(ytProgressTimer);
+    ytProgressTimer = setInterval(fmtTime, 400);
+  } else {
+    if (toggle) toggle.innerHTML = ICON.play;
+    if ((e.data === 2 || e.data === 0) && overlay) overlay.classList.remove('hidden'); // pausado o terminado
+    clearInterval(ytProgressTimer);
+  }
+}
+
+// ---------- perfil / foto antes-después ----------
+function renderPerfil(){
+  const d = state.diagnostico, c = state.cierre;
+
+  function campo(labelId, value, step='1'){
+    return `<div class="field"><label>${labelId}</label><input type="number" step="${step}" id="${labelId}" value="${value ?? ''}"></div>`;
+  }
+
+  let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Tu progreso</h2>`;
+
+  html += `<div class="box">
+    <h3>Foto numérica — Semana 0</h3>
+    <p class="d">Los mismos 4 números que vas a volver a mirar en tu llamada de cierre. Cargalos una sola vez, lo antes posible.</p>
+    <div id="form-diag">
+      ${campo('facturacion_cash', d?.facturacion_cash)}
+      ${campo('show_rate', d?.show_rate, '0.1')}
+      ${campo('close_rate', d?.close_rate, '0.1')}
+      ${campo('leads_semana', d?.leads_semana)}
+      <button class="primary" id="btn-diag">${d ? 'Actualizar' : 'Guardar'}</button>
+    </div>
+  </div>`;
+
+  html += `<div class="box">
+    <h3>Foto numérica — Cierre (Semana 10)</h3>
+    <p class="d">Completala en tu llamada 1:1 de cierre, junto con el founder.</p>
+    <div id="form-cierre">
+      ${campo('c_facturacion_cash', c?.facturacion_cash)}
+      ${campo('c_show_rate', c?.show_rate, '0.1')}
+      ${campo('c_close_rate', c?.close_rate, '0.1')}
+      ${campo('c_leads_semana', c?.leads_semana)}
+      <button class="primary" id="btn-cierre">${c ? 'Actualizar' : 'Guardar'}</button>
+    </div>
+  </div>`;
+
+  if (d && c){
+    const rows = [
+      ['Facturación cash', d.facturacion_cash, c.facturacion_cash],
+      ['Show rate', d.show_rate, c.show_rate, '%'],
+      ['Close rate', d.close_rate, c.close_rate, '%'],
+      ['Leads / semana', d.leads_semana, c.leads_semana],
+    ];
+    html += `<div class="box"><h3>Antes vs. ahora</h3><p class="d">Esta es la comparación real de tu paso por BDL.</p><div class="foto-grid">`;
+    for (const [label, before, after, suf=''] of rows){
+      const delta = (after!=null && before!=null) ? (after-before) : null;
+      const cls = delta == null ? '' : delta >= 0 ? 'up' : 'down';
+      html += `<div class="foto-stat"><div class="l">${label}</div><div class="v">${before ?? '—'}${suf} → ${after ?? '—'}${suf}</div>${delta!=null ? `<div class="delta ${cls}">${delta>=0?'+':''}${delta.toFixed(1)}${suf}</div>`:''}</div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  view.innerHTML = html;
+
+  $('#btn-diag').onclick = async () => {
+    const payload = {
+      alumno_id: state.user.id,
+      lidera_equipo: true,
+      facturacion_cash: num('facturacion_cash'),
+      show_rate: num('show_rate'),
+      close_rate: num('close_rate'),
+      leads_semana: num('leads_semana'),
+    };
+    const { data } = await sb.from('diagnostico').upsert(payload).select().single();
+    state.diagnostico = data;
+    toast('Guardado');
+    renderPerfil();
+  };
+  $('#btn-cierre').onclick = async () => {
+    const payload = {
+      alumno_id: state.user.id,
+      facturacion_cash: num('c_facturacion_cash'),
+      show_rate: num('c_show_rate'),
+      close_rate: num('c_close_rate'),
+      leads_semana: num('c_leads_semana'),
+    };
+    const { data } = await sb.from('cierre').upsert(payload).select().single();
+    state.cierre = data;
+    toast('Guardado');
+    renderPerfil();
+  };
+
+  function num(id){ const v = $('#'+id).value; return v === '' ? null : parseFloat(v); }
+}
+
+// ---------- admin ----------
+async function renderAdmin(){
+  if (state.profile.rol !== 'founder'){ location.hash = '#/'; return; }
+
+  const [{data: alumnos}, {data: todoProgreso}] = await Promise.all([
+    sb.from('profiles').select('*').order('created_at'),
+    sb.from('progreso').select('alumno_id'),
+  ]);
+  const totalLec = state.lecciones.length;
+  const conteo = {};
+  (todoProgreso||[]).forEach(p => conteo[p.alumno_id] = (conteo[p.alumno_id]||0)+1);
+
+  const pendientes = (alumnos||[]).filter(a => a.rol !== 'founder' && a.pidio_desbloqueo);
+
+  let html = `<h2 style="font-family:'Archivo Black';font-weight:400;font-size:21px;margin:0 0 20px">Admin</h2>`;
+
+  html += `<div class="box"><h3>Pedidos de desbloqueo</h3><p class="d">Alumnos que avisaron que terminaron su semana actual y el entregable.</p>`;
+  html += pendientes.length
+    ? `<table class="admin"><tr><th>Nombre</th><th>Semana actual</th><th></th></tr>
+       ${pendientes.map(a => `<tr>
+         <td>${a.nombre}</td>
+         <td class="mono">Semana ${a.modulo_actual}</td>
+         <td><button class="primary" data-desbloquear="${a.id}" data-actual="${a.modulo_actual}">Desbloquear Semana ${a.modulo_actual+1}</button></td>
+       </tr>`).join('')}
+       </table>`
+    : `<p class="d" style="margin:0">No hay pedidos pendientes.</p>`;
+  html += `</div>`;
+
+  html += `<div class="box"><h3>Alumnos</h3><p class="d">Los accesos se crean desde Supabase → Authentication → Add user. Acá controlás en qué semana está cada uno — podés adelantarlo manualmente sin esperar su pedido.</p>
+    <table class="admin"><tr><th>Nombre</th><th>Rol</th><th>Semana actual</th><th></th><th>Progreso</th></tr>
+    ${(alumnos||[]).map(a => `<tr>
+      <td>${a.nombre}</td>
+      <td><span class="tag-rol">${a.rol}</span></td>
+      <td>${a.rol === 'founder' ? '—' : `<input type="number" min="0" max="10" style="width:64px" id="mod-${a.id}" value="${a.modulo_actual}">`}</td>
+      <td>${a.rol === 'founder' ? '' : `<button data-setmod="${a.id}">Guardar</button>`}</td>
+      <td>${conteo[a.id]||0}/${totalLec}</td>
+    </tr>`).join('')}
+    </table>
+  </div>`;
+
+  html += `<div class="box"><h3>Cargar videos (YouTube)</h3><p class="d">Subí el video como <b>no listado</b> en YouTube, copiá el ID de la URL (lo que va después de <code>v=</code>) y pegalo acá.</p>
+    <table class="admin"><tr><th>#</th><th>Título</th><th>YouTube ID</th><th></th></tr>
+    ${state.lecciones.map(l => `<tr data-lid="${l.id}">
+      <td class="mono">${l.numero}</td>
+      <td>${l.titulo}</td>
+      <td><input value="${l.youtube_id||''}" placeholder="dQw4w9WgXcQ"></td>
+      <td><button data-save="${l.id}">Guardar</button></td>
+    </tr>`).join('')}
+    </table>
+  </div>`;
+
+  view.innerHTML = html;
+
+  $$('button[data-desbloquear]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.desbloquear;
+    const nuevo = parseInt(btn.dataset.actual) + 1;
+    await sb.from('profiles').update({ modulo_actual: nuevo, pidio_desbloqueo: false }).eq('id', id);
+    toast('Desbloqueado');
+    renderAdmin();
+  });
+  $$('button[data-setmod]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.setmod;
+    const val = parseInt($('#mod-'+id).value) || 0;
+    await sb.from('profiles').update({ modulo_actual: val, pidio_desbloqueo: false }).eq('id', id);
+    toast('Actualizado');
+    renderAdmin();
+  });
+  $$('button[data-save]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.save;
+    const input = btn.closest('tr').querySelector('input');
+    const val = input.value.trim();
+    await sb.from('lecciones').update({ youtube_id: val || null }).eq('id', id);
+    const l = state.lecciones.find(x => x.id === id);
+    if (l) l.youtube_id = val || null;
+    toast('Video actualizado');
+  });
+}
+
+// ---------- auth bootstrap ----------
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user){
+    state.user = session.user;
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    state.profile = profile;
+    if (profile?.rol === 'founder') $('#nav-admin').classList.remove('hidden');
+    removeLoginScreen();
+    $('#app').classList.remove('hidden');
+    await cargarDatosBase();
+    route();
+  } else {
+    state.user = null;
+    $('#app').classList.add('hidden');
+    route();
+  }
+});
+
+$('#nav-logout').onclick = () => sb.auth.signOut();
+</script>
+</body>
+</html>
