@@ -7,11 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#13294B; --bg-2:#17315A; --card:#1B3A66; --line:#2C4F7C;
-  --gold:#D4AF37; --gold-deep:#B8923A; --gold-soft:#E8CC6E;
-  --ink:#F4F6FA; --muted:#A9BBD1; --faint:#6E85A3;
+  --bg:#161616; --bg-2:#1C1C1C; --card:#212121; --line:#343434;
+  --gold:#C9A227; --gold-deep:#8B6A1B; --gold-soft:#E4C766;
+  --ink:#F2F0EC; --muted:#A8A39B; --faint:#6E6A63;
   --ok:#3FA66B; --warn:#E08A6E;
-  --shadow:8,18,36;
+  --shadow:0,0,0;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -109,7 +109,7 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transf
 .player .pending{height:100%;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:14px;text-align:center;padding:20px}
 #yt-mount{width:100%;height:100%}
 .yt-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);cursor:pointer}
-.yt-big-play{width:60px;height:60px;border-radius:50%;background:rgba(212,175,55,.94);border:0;color:#1A1406;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 10px 24px -8px rgba(var(--shadow),.6)}
+.yt-big-play{width:60px;height:60px;border-radius:50%;background:rgba(201,162,39,.94);border:0;color:#1A1406;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 10px 24px -8px rgba(var(--shadow),.6)}
 .yt-big-play svg{width:22px;height:22px;margin-left:3px}
 .yt-controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent)}
 .yt-btn{background:transparent;border:0;color:var(--ink);padding:4px;min-width:0}
@@ -158,7 +158,7 @@ table.admin input{padding:6px 8px;font-size:12.5px}
 <div id="app" class="hidden">
   <header class="top">
     <div class="brand" data-nav="#/">
-      <svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CC6E"/><stop offset="100%" stop-color="#B8923A"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g1)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#0F1F38" stroke="url(#g1)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F4F6FA">BDL</text></svg>
+      <svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E4C766"/><stop offset="100%" stop-color="#8B6A1B"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g1)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#0E0E0E" stroke="url(#g1)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F2F0EC">BDL</text></svg>
       <b>BDL — Bastión De <em>Líderes</em></b>
     </div>
     <div class="nav-right">
@@ -167,8 +167,8 @@ table.admin input{padding:6px 8px;font-size:12.5px}
       <a class="nav-link" id="nav-logout">Salir</a>
       <div class="ring">
         <svg width="38" height="38" viewBox="0 0 40 40">
-          <circle cx="20" cy="20" r="16" fill="none" stroke="#2C4F7C" stroke-width="4"/>
-          <circle id="ring-progress" cx="20" cy="20" r="16" fill="none" stroke="#D4AF37" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="16" fill="none" stroke="#343434" stroke-width="4"/>
+          <circle id="ring-progress" cx="20" cy="20" r="16" fill="none" stroke="#C9A227" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round"/>
         </svg>
         <span class="pct" id="ring-pct">0%</span>
       </div>
@@ -292,7 +292,7 @@ document.addEventListener('click', (e) => {
 
 // ---------- login / registro ----------
 let authMode = 'login'; // 'login' | 'signup'
-const CRESTSVG = `<svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CC6E"/><stop offset="100%" stop-color="#B8923A"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g2)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#0F1F38" stroke="url(#g2)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F4F6FA">BDL</text></svg>`;
+const CRESTSVG = `<svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E4C766"/><stop offset="100%" stop-color="#8B6A1B"/></linearGradient></defs><path d="M100,4 L104,15 L116,15 L106,22 L110,33 L100,26 L90,33 L94,22 L84,15 L96,15 Z" fill="url(#g2)"/><path d="M100,210 Q40,150 15,75 L25,46 L25,28 L55,28 L55,46 L85,46 L85,28 L115,28 L115,46 L145,46 L145,28 L175,28 L175,46 L185,75 Q160,150 100,210 Z" fill="#0E0E0E" stroke="url(#g2)" stroke-width="3" stroke-linejoin="round"/><text x="100" y="128" text-anchor="middle" font-family="Archivo Black, Arial, sans-serif" font-size="46" fill="#F2F0EC">BDL</text></svg>`;
 
 function removeLoginScreen(){
   const el = document.getElementById('login-screen');
@@ -369,8 +369,8 @@ function renderDashboard(){
       </div>
       <div class="hero-ring">
         <svg width="60" height="60" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="27" fill="none" stroke="#2C4F7C" stroke-width="6"/>
-          <circle cx="32" cy="32" r="27" fill="none" stroke="#D4AF37" stroke-width="6" stroke-linecap="round"
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#343434" stroke-width="6"/>
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#C9A227" stroke-width="6" stroke-linecap="round"
             stroke-dasharray="${2*Math.PI*27}" stroke-dashoffset="${2*Math.PI*27 - (2*Math.PI*27*pct/100)}"
             transform="rotate(-90 32 32)"/>
         </svg>
