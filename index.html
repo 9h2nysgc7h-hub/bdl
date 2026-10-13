@@ -314,7 +314,19 @@ function esStaff(profile){
 function moduloDesbloqueado(modulo){
   if (!state.profile) return false;
   if (esStaff(state.profile)) return true;
+  if (state.profile.es_preview) return true; // ve el catálogo completo; el candado real es por lección
   return modulo.numero <= state.profile.modulo_actual;
+}
+
+// Cuentas de preview (es_preview=true): acceso gratuito puntual a 3 lecciones
+// sueltas para generar hype, el resto queda "oculto" aunque se vea el título.
+// No tocan modulo_actual — ignoran el desbloqueo normal por semana.
+const PREVIEW_LECCIONES = ['3.1', '3.2', '3.5'];
+function leccionDesbloqueada(l, modulo){
+  if (!state.profile) return false;
+  if (esStaff(state.profile)) return true;
+  if (state.profile.es_preview) return PREVIEW_LECCIONES.includes(l.id);
+  return moduloDesbloqueado(modulo);
 }
 
 // ---------- carga de datos ----------
@@ -488,7 +500,9 @@ function renderDashboard(){
 
   let html = '';
 
-  if (!staff && state.profile.aprobado && !state.profile.aprobado_visto){
+  if (!staff && state.profile.es_preview){
+    html += `<div class="banner"><p style="margin:0">Tenés acceso gratis a ${PREVIEW_LECCIONES.length} lecciones — el resto del programa está ahí abajo, escribinos por WhatsApp para desbloquearlo entero.</p></div>`;
+  } else if (!staff && state.profile.aprobado && !state.profile.aprobado_visto){
     html += `<div class="banner"><p style="margin:0">¡Tu cuenta fue aprobada! Ya podés arrancar con la Semana 0.</p><button id="banner-aprobado-ok">Entendido</button></div>`;
   } else if (!staff && state.profile.modulo_actual > state.profile.modulo_visto){
     html += `<div class="banner"><p style="margin:0">¡Se desbloqueó la Semana ${state.profile.modulo_actual}!</p><button id="banner-modulo-ok">Entendido</button></div>`;
@@ -498,7 +512,7 @@ function renderDashboard(){
     <div class="hero">
       <div>
         <h2>Hola, ${state.profile.nombre}</h2>
-        <p>${hechas} de ${total} lecciones completadas${staff ? '' : ` · estás en la Semana ${state.profile.modulo_actual}`}</p>
+        <p>${hechas} de ${total} lecciones completadas${staff || state.profile.es_preview ? '' : ` · estás en la Semana ${state.profile.modulo_actual}`}</p>
       </div>
       <div class="hero-ring">
         <svg width="60" height="60" viewBox="0 0 64 64">
@@ -513,7 +527,7 @@ function renderDashboard(){
   `;
 
   html += `<div class="tabs">` + state.modulos.map(m => {
-    const cls = staff ? 'pasado' : m.numero === state.profile.modulo_actual ? 'actual' : m.numero < state.profile.modulo_actual ? 'pasado' : 'bloqueado';
+    const cls = staff || state.profile.es_preview ? 'pasado' : m.numero === state.profile.modulo_actual ? 'actual' : m.numero < state.profile.modulo_actual ? 'pasado' : 'bloqueado';
     const icon = cls === 'pasado' ? ICON.check : cls === 'bloqueado' ? ICON.lock : '';
     return `<button class="tab ${cls}" data-jump="modulo-${m.numero}">${icon ? `<span class="icon sm">${icon}</span>` : ''}Semana ${m.numero}</button>`;
   }).join('') + `</div>`;
@@ -534,7 +548,7 @@ function renderDashboard(){
       </div>
       <div class="modulo-bar"><div class="modulo-bar-fill" style="width:${desbloqueado ? pctModulo : 0}%"></div></div>
       <div class="grid">
-        ${lecs.map(l => cardLeccion(l, desbloqueado)).join('')}
+        ${lecs.map(l => cardLeccion(l, leccionDesbloqueada(l, modulo))).join('')}
       </div>
       ${esActual && todasCompletas ? (
         state.profile.pidio_desbloqueo
@@ -603,7 +617,7 @@ function cardLeccion(l, desbloqueado){
       </div>
       <div class="card-body">
         <p class="tit">${l.titulo}</p>
-        <p class="sub">${l.tipo === 'entregable' ? 'ENTREGABLE' : 'LECCIÓN'}</p>
+        <p class="sub">${!desbloqueado && state.profile?.es_preview ? 'VIDEO OCULTO' : l.tipo === 'entregable' ? 'ENTREGABLE' : 'LECCIÓN'}</p>
       </div>
     </div>`;
 }
@@ -633,7 +647,7 @@ function renderLeccion(id){
   const l = state.lecciones.find(x => x.id === id);
   if (!l){ location.hash = '#/'; return; }
   const modulo = state.modulos.find(m => m.id === l.modulo_id);
-  if (!moduloDesbloqueado(modulo)){ location.hash = '#/'; return; }
+  if (!leccionDesbloqueada(l, modulo)){ location.hash = '#/'; return; }
 
   const idx = state.lecciones.findIndex(x => x.id === id);
   const prev = state.lecciones[idx-1];
@@ -956,7 +970,7 @@ async function renderAdmin(){
   html += `</div>`;
 
   html += `<div class="box"><h3>Miembros</h3><p class="d">Acá controlás el rol, la semana y la aprobación de cada persona a mano, sin esperar su pedido.</p>
-    <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Semana</th><th>Estado</th><th>Último acceso</th><th>En esta semana</th><th></th><th>Progreso</th><th></th></tr>
+    <table class="admin"><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Semana</th><th>Preview</th><th>Estado</th><th>Último acceso</th><th>En esta semana</th><th></th><th>Progreso</th><th></th></tr>
     ${(alumnos||[]).map(a => {
       const avanceAlumno = avancePorAlumno[a.id] || [];
       const enCurso = avanceAlumno.find(v => v.modulo_numero === a.modulo_actual && !v.completado_at);
@@ -966,13 +980,14 @@ async function renderAdmin(){
         : 'Sin historial todavía — se empieza a registrar desde que se corrió la migración.';
       if (a.rol === 'founder') return `<tr>
         <td>${a.nombre}</td><td class="mono">${a.email||'—'}</td>
-        <td><span class="tag-rol">founder</span></td><td>—</td><td>—</td><td class="mono">${hace(a.ultimo_acceso)}</td><td>—</td><td></td><td>${conteo[a.id]||0}/${totalLec}</td><td></td>
+        <td><span class="tag-rol">founder</span></td><td>—</td><td>—</td><td>—</td><td class="mono">${hace(a.ultimo_acceso)}</td><td>—</td><td></td><td>${conteo[a.id]||0}/${totalLec}</td><td></td>
       </tr>`;
       return `<tr class="${estaEnRiesgo(a, diasEtapa) ? 'riesgo' : ''}">
         <td>${a.nombre}</td>
         <td class="mono">${a.email||'—'}</td>
         <td><select id="rol-${a.id}"><option value="alumno" ${a.rol==='alumno'?'selected':''}>alumno</option><option value="admin" ${a.rol==='admin'?'selected':''}>admin</option></select></td>
         <td><input type="number" min="0" max="10" style="width:56px" id="mod-${a.id}" value="${a.modulo_actual}"></td>
+        <td><input type="checkbox" id="preview-${a.id}" ${a.es_preview?'checked':''} title="Solo ve las 3 lecciones de preview (${PREVIEW_LECCIONES.join(', ')})"></td>
         <td>${a.aprobado ? '<span class="tag-rol" style="color:var(--ok)">aprobado</span>' : '<span class="tag-rol" style="color:var(--warn)">pendiente</span>'}</td>
         <td class="mono">${hace(a.ultimo_acceso)}</td>
         <td class="mono">${diasEtapa === null ? '—' : diasEtapa + ' días'}</td>
@@ -980,7 +995,7 @@ async function renderAdmin(){
         <td>${conteo[a.id]||0}/${totalLec}</td>
         <td><button data-toggle-historial="${a.id}">Historial</button></td>
       </tr>
-      <tr class="hidden" id="historial-${a.id}"><td colspan="10" style="background:var(--bg-2);font-size:12.5px;color:var(--muted);line-height:1.8">${historialHtml}</td></tr>`;
+      <tr class="hidden" id="historial-${a.id}"><td colspan="11" style="background:var(--bg-2);font-size:12.5px;color:var(--muted);line-height:1.8">${historialHtml}</td></tr>`;
     }).join('')}
     </table>
   </div>`;
@@ -1054,7 +1069,8 @@ async function renderAdmin(){
     const id = btn.dataset.setmod;
     const val = parseInt($('#mod-'+id).value) || 0;
     const rol = $('#rol-'+id).value;
-    await sb.from('profiles').update({ modulo_actual: val, rol }).eq('id', id);
+    const es_preview = $('#preview-'+id)?.checked || false;
+    await sb.from('profiles').update({ modulo_actual: val, rol, es_preview }).eq('id', id);
     toast('Actualizado');
     renderAdmin();
   });
@@ -1240,7 +1256,15 @@ sb.auth.onAuthStateChange(async (event, session) => {
     $('#nav-alumnos').classList.toggle('hidden', !esStaff(profile));
     removeLoginScreen();
     $('#app').classList.remove('hidden');
-    $('#wa-float').classList.remove('hidden');
+    const waFloat = $('#wa-float');
+    waFloat.classList.remove('hidden');
+    if (profile.es_preview){
+      waFloat.href = 'https://wa.me/5493541548204?text=' + encodeURIComponent('Quiero desbloquear el resto de los videos ocultos');
+      waFloat.querySelector('span').textContent = 'Reclamá tus videos ocultos';
+    } else {
+      waFloat.href = 'https://wa.me/5493541548204?text=' + encodeURIComponent('Hola! tengo una consulta sobre BDL');
+      waFloat.querySelector('span').textContent = 'Escribime';
+    }
     sb.from('profiles').update({ ultimo_acceso: new Date().toISOString() }).eq('id', profile.id)
       .then(() => { profile.ultimo_acceso = new Date().toISOString(); });
     await cargarDatosBase();
