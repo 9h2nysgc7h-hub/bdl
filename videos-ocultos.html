@@ -32,7 +32,7 @@
   p.lead{font-size:15.5px;line-height:1.6;color:var(--muted);max-width:56ch;margin:0 0 32px}
 
   .player{background:#000;border-radius:14px;overflow:hidden;position:relative;border:1px solid var(--line)}
-  .player video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+  .player iframe{display:block;width:100%;aspect-ratio:16/9;background:#000;border:0;pointer-events:none}
   .tapa{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .25s}
   .tapa.oculta{opacity:0;pointer-events:none}
   .tapa .play-grande{width:68px;height:68px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center}
@@ -85,10 +85,7 @@
   <p class="lead">Al terminarlo se desbloquea tu código para entrar gratis a 3 clases completas del programa.</p>
 
   <div class="player" id="player">
-    <video id="video" playsinline preload="metadata" poster="videos/poster-videos-ocultos.jpg">
-      <source src="videos/videos-ocultos.mp4" type="video/mp4">
-      Tu navegador no puede reproducir este video.
-    </video>
+    <div id="yt-player"></div>
     <div class="tapa" id="tapa">
       <div class="play-grande"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7V5z"/></svg></div>
     </div>
@@ -127,9 +124,10 @@
   <footer>Bastión De Líderes by Nave</footer>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 (function(){
-  var video = document.getElementById('video');
+  var YT_VIDEO_ID = 'eNwZiYdoEGY';
   var tapa = document.getElementById('tapa');
   var player = document.getElementById('player');
   var btnPlay = document.getElementById('btn-play');
@@ -146,6 +144,8 @@
   var TOLERANCIA = 2; // segundos: red de seguridad si 'ended' no dispara
   var maxVisto = 0;
   var terminado = false;
+  var yt = null;
+  var arrancado = false;
 
   function leer(){
     try { return JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch(e){ return {}; }
@@ -168,64 +168,35 @@
     terminado = true;
     guardar();
     cajaCodigo.classList.remove('bloqueada');
-    document.getElementById('overlay-espera').remove();
+    document.getElementById('overlay-espera')?.remove();
   }
 
-  function pintarPlay(){
-    iconoPlay.innerHTML = video.paused
+  function pintarPlay(playing){
+    iconoPlay.innerHTML = !playing
       ? '<path d="M8 5l11 7-11 7V5z"/>'
       : '<rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect>';
   }
 
   function arrancar(){
-    var p = video.play();
-    if (p && p.catch) p.catch(function(){});
+    if (!yt || !yt.playVideo) return;
+    arrancado = true;
+    yt.playVideo();
     tapa.classList.add('oculta');
     player.classList.add('empezo');
   }
 
   tapa.addEventListener('click', arrancar);
   btnPlay.addEventListener('click', function(){
-    if (video.paused) arrancar(); else video.pause();
+    if (!yt || !yt.getPlayerState) return;
+    if (!arrancado){ arrancar(); return; }
+    if (yt.getPlayerState() === 1) yt.pauseVideo(); else yt.playVideo();
   });
-  video.addEventListener('play', pintarPlay);
-  video.addEventListener('pause', function(){ pintarPlay(); guardar(); });
 
   btnVol.addEventListener('click', function(){
-    video.muted = !video.muted;
-    btnVol.style.opacity = video.muted ? '.5' : '1';
+    if (!yt || !yt.isMuted) return;
+    if (yt.isMuted()){ yt.unMute(); btnVol.style.opacity = '1'; }
+    else { yt.mute(); btnVol.style.opacity = '.5'; }
   });
-
-  video.addEventListener('timeupdate', function(){
-    var t = video.currentTime;
-    if (t > maxVisto && t - maxVisto < 1.5){
-      maxVisto = t;
-      if (Math.floor(t) % 5 === 0) guardar();
-    }
-    if (video.duration) fill.style.width = (Math.min(t, video.duration) / video.duration * 100) + '%';
-    relojEl.textContent = reloj(t);
-    if (!terminado && video.duration){
-      var faltan = video.duration - t;
-      if (faltan <= TOLERANCIA) desbloquear();
-      else restanteEl.textContent = 'Falta ' + reloj(faltan);
-    }
-  });
-
-  // El 'seeking' cubre teclado/controles nativos — el intento de salto
-  // se revierte al punto más lejano que realmente vio.
-  video.addEventListener('seeking', function(){
-    if (terminado) return;
-    if (video.currentTime > maxVisto + 1){
-      video.currentTime = maxVisto;
-    }
-  });
-
-  video.addEventListener('ended', desbloquear);
-  video.addEventListener('loadedmetadata', function(){
-    if (!terminado && video.duration) restanteEl.textContent = 'Falta ' + reloj(video.duration);
-    if (maxVisto > 0) video.currentTime = maxVisto;
-  });
-  window.addEventListener('pagehide', guardar);
 
   btnCopiar.addEventListener('click', function(){
     navigator.clipboard?.writeText(codigoTexto).then(function(){
@@ -238,8 +209,54 @@
     });
   });
 
-  pintarPlay();
+  window.addEventListener('pagehide', guardar);
+  pintarPlay(false);
   if (terminado) desbloquear();
+
+  function poll(){
+    if (!yt || !yt.getDuration) return;
+    var dur = yt.getDuration();
+    if (!dur) return;
+    var t = yt.getCurrentTime();
+
+    if (!terminado && t > maxVisto + 1.5){
+      yt.seekTo(maxVisto, true);
+      t = maxVisto;
+    } else if (t > maxVisto){
+      maxVisto = t;
+      guardar();
+    }
+
+    fill.style.width = (Math.min(t, dur) / dur * 100) + '%';
+    relojEl.textContent = reloj(t);
+    if (!terminado){
+      var faltan = dur - t;
+      if (faltan <= TOLERANCIA) desbloquear();
+      else restanteEl.textContent = 'Falta ' + reloj(faltan);
+    }
+  }
+
+  window.onYouTubeIframeAPIReady = function(){
+    yt = new YT.Player('yt-player', {
+      videoId: YT_VIDEO_ID,
+      playerVars: {
+        controls: 0, disablekb: 1, modestbranding: 1, rel: 0, fs: 0,
+        iv_load_policy: 3, playsinline: 1, origin: location.origin
+      },
+      events: {
+        onReady: function(){
+          if (maxVisto > 0) yt.seekTo(maxVisto, true);
+          setInterval(poll, 250);
+        },
+        onStateChange: function(e){
+          pintarPlay(e.data === 1);
+          if (e.data === 1) arrancado = true;
+          if (e.data === 2) guardar();
+          if (e.data === 0) desbloquear();
+        }
+      }
+    });
+  };
 })();
 </script>
 </body>
