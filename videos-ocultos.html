@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Videos ocultos — Bastión De Líderes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#161616; --bg2:#1C1C1C; --card:#212121; --line:#343434;
+    --gold:#C9A227; --gold-deep:#8B6A1B; --gold-soft:#E4C766;
+    --ink:#F2F0EC; --muted:#A8A39B; --bad:#E08A6E;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(900px 480px at 85% -10%, rgba(201,162,39,.10), transparent 60%),
+      var(--bg);
+    font-family:'Inter',-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:56px 20px 100px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:36px}
+  .crest{width:28px;height:28px}
+  .wm{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase}
+  .wm b{color:var(--gold)}
+
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin:0 0 10px}
+  h1{font-family:'Archivo Black',Arial,sans-serif;font-size:clamp(26px,4vw,34px);line-height:1.15;margin:0 0 10px;text-wrap:balance}
+  p.lead{font-size:15.5px;line-height:1.6;color:var(--muted);max-width:56ch;margin:0 0 32px}
+
+  .player{background:#000;border-radius:14px;overflow:hidden;position:relative;border:1px solid var(--line)}
+  .player video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+  .tapa{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .25s}
+  .tapa.oculta{opacity:0;pointer-events:none}
+  .tapa .play-grande{width:68px;height:68px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center}
+  .tapa .play-grande svg{width:26px;height:26px;fill:#1A1406;margin-left:3px}
+
+  .controles{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);opacity:0;transition:opacity .2s}
+  .player.empezo .controles{opacity:1}
+  .btn-ctrl{background:none;border:none;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;flex-shrink:0}
+  .btn-ctrl svg{width:18px;height:18px;fill:var(--ink)}
+  .barra{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden;cursor:not-allowed}
+  .barra-fill{height:100%;width:0;background:var(--gold);border-radius:3px}
+  .reloj{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--muted);flex-shrink:0;min-width:40px;text-align:right}
+
+  .banner{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:20px 0;font-size:13.5px;color:var(--muted);line-height:1.5}
+  .banner b{color:var(--gold-soft)}
+
+  .caja{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 30px;margin-top:28px;position:relative;overflow:hidden}
+  .caja.bloqueada{filter:blur(6px);opacity:.5;pointer-events:none;user-select:none}
+  .rotulo{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin:0 0 8px}
+  .codigo-linea{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .codigo{font-family:'Space Mono',monospace;font-size:26px;letter-spacing:.08em;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 18px}
+  .btn-copiar{background:var(--gold);color:#1A1406;border:none;border-radius:999px;padding:10px 20px;font-weight:700;font-size:13.5px;cursor:pointer}
+  .btn-copiar.copiado{background:var(--gold-soft)}
+  ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+  ol li{font-size:14.5px;line-height:1.55;color:var(--ink)}
+  ol li b{color:var(--gold-soft)}
+  .btn-ir{display:inline-flex;margin-top:18px;background:var(--gold);color:#1A1406;text-decoration:none;font-weight:800;font-size:14.5px;padding:13px 24px;border-radius:999px}
+
+  .overlay-espera{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:0 30px}
+  .overlay-espera p{margin:0;font-size:13.5px;color:var(--muted)}
+  .overlay-espera .falta{font-family:'Space Mono',monospace;font-size:13px;color:var(--gold-soft)}
+
+  .wa-fija{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:30px;text-decoration:none;color:var(--muted);font-size:13.5px;border:1px solid var(--line);border-radius:999px;padding:12px 20px}
+  .wa-fija:hover{border-color:var(--gold-deep)}
+  .wa-fija b{color:var(--gold-soft)}
+
+  footer{margin-top:50px;color:#6B665E;font-family:'Space Mono',monospace;font-size:10.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <svg class="crest" viewBox="0 0 100 110" fill="none"><path d="M50 4 L92 20 V52 C92 78 74 98 50 106 C26 98 8 78 8 52 V20 Z" stroke="#C9A227" stroke-width="3"/><path d="M50 24 L50 86M34 40 L66 40M30 56 L70 56" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <div class="wm"><b>BDL</b> · Bastión De Líderes</div>
+  </div>
+
+  <p class="eyebrow">Antes de entrar</p>
+  <h1>Mirá esto antes de reclamar tus videos ocultos</h1>
+  <p class="lead">Al terminarlo se desbloquea tu código para entrar gratis a 3 clases completas del programa.</p>
+
+  <div class="player" id="player">
+    <video id="video" playsinline preload="metadata" poster="videos/poster-videos-ocultos.jpg">
+      <source src="videos/videos-ocultos.mp4" type="video/mp4">
+      Tu navegador no puede reproducir este video.
+    </video>
+    <div class="tapa" id="tapa">
+      <div class="play-grande"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7V5z"/></svg></div>
+    </div>
+    <div class="controles">
+      <button class="btn-ctrl" id="btn-play" aria-label="Reproducir"><svg id="icono-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7V5z"/></svg></button>
+      <button class="btn-ctrl" id="btn-vol" aria-label="Silenciar"><svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg></button>
+      <div class="barra" title="El avance no se puede adelantar"><div class="barra-fill" id="barra-fill"></div></div>
+      <div class="reloj" id="reloj">0:00</div>
+    </div>
+  </div>
+
+  <div class="banner"><b>El avance no se puede adelantar</b> — se desbloquea solo si lo ves entero, de principio a fin.</div>
+
+  <div class="caja bloqueada" id="caja-codigo">
+    <p class="rotulo">Tu código</p>
+    <div class="codigo-linea">
+      <div class="codigo" id="codigo-texto">BDLVIP</div>
+      <button class="btn-copiar" id="btn-copiar">Copiar código</button>
+    </div>
+    <ol>
+      <li>Entrá a <b>Plataforma BDL</b> y creá tu cuenta (nombre, email, contraseña).</li>
+      <li>Cuando te diga "cuenta pendiente de aprobación", pegá el código de arriba donde dice <b>"¿Tenés un código de acceso?"</b>.</li>
+      <li>Se habilita solo — vas a ver el catálogo completo y vas a poder reproducir 3 clases enteras, gratis.</li>
+    </ol>
+    <a class="btn-ir" id="btn-ir" href="https://bastiondelideres-skool.vercel.app" target="_blank" rel="noopener">Ir a Plataforma BDL →</a>
+    <div class="overlay-espera" id="overlay-espera">
+      <p>Tu código se desbloquea al terminar el video.</p>
+      <p class="falta" id="restante">Falta —</p>
+    </div>
+  </div>
+
+  <a class="wa-fija" id="wa-fija" href="https://wa.me/5493541548204?text=Hola!%20quiero%20hablar%20antes%20de%20la%20Clase%202" target="_blank" rel="noopener">
+    ¿No querés esperar al viernes? <b>Escribime ahora</b>
+  </a>
+
+  <footer>Bastión De Líderes by Nave</footer>
+</div>
+
+<script>
+(function(){
+  var video = document.getElementById('video');
+  var tapa = document.getElementById('tapa');
+  var player = document.getElementById('player');
+  var btnPlay = document.getElementById('btn-play');
+  var iconoPlay = document.getElementById('icono-play');
+  var btnVol = document.getElementById('btn-vol');
+  var fill = document.getElementById('barra-fill');
+  var relojEl = document.getElementById('reloj');
+  var restanteEl = document.getElementById('restante');
+  var cajaCodigo = document.getElementById('caja-codigo');
+  var btnCopiar = document.getElementById('btn-copiar');
+  var codigoTexto = document.getElementById('codigo-texto').textContent;
+
+  var CLAVE = 'bdl_videos_ocultos_v1';
+  var TOLERANCIA = 2; // segundos: red de seguridad si 'ended' no dispara
+  var maxVisto = 0;
+  var terminado = false;
+
+  function leer(){
+    try { return JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch(e){ return {}; }
+  }
+  function guardar(){
+    try { localStorage.setItem(CLAVE, JSON.stringify({ maxVisto: maxVisto, terminado: terminado })); } catch(e){}
+  }
+  var previo = leer();
+  maxVisto = previo.maxVisto || 0;
+  terminado = !!previo.terminado;
+
+  function reloj(s){
+    s = Math.max(0, Math.floor(s));
+    var m = Math.floor(s/60), ss = s%60;
+    return m + ':' + (ss<10?'0':'') + ss;
+  }
+
+  function desbloquear(){
+    if (terminado && cajaCodigo.classList.contains('bloqueada') === false) return;
+    terminado = true;
+    guardar();
+    cajaCodigo.classList.remove('bloqueada');
+    document.getElementById('overlay-espera').remove();
+  }
+
+  function pintarPlay(){
+    iconoPlay.innerHTML = video.paused
+      ? '<path d="M8 5l11 7-11 7V5z"/>'
+      : '<rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect>';
+  }
+
+  function arrancar(){
+    var p = video.play();
+    if (p && p.catch) p.catch(function(){});
+    tapa.classList.add('oculta');
+    player.classList.add('empezo');
+  }
+
+  tapa.addEventListener('click', arrancar);
+  btnPlay.addEventListener('click', function(){
+    if (video.paused) arrancar(); else video.pause();
+  });
+  video.addEventListener('play', pintarPlay);
+  video.addEventListener('pause', function(){ pintarPlay(); guardar(); });
+
+  btnVol.addEventListener('click', function(){
+    video.muted = !video.muted;
+    btnVol.style.opacity = video.muted ? '.5' : '1';
+  });
+
+  video.addEventListener('timeupdate', function(){
+    var t = video.currentTime;
+    if (t > maxVisto && t - maxVisto < 1.5){
+      maxVisto = t;
+      if (Math.floor(t) % 5 === 0) guardar();
+    }
+    if (video.duration) fill.style.width = (Math.min(t, video.duration) / video.duration * 100) + '%';
+    relojEl.textContent = reloj(t);
+    if (!terminado && video.duration){
+      var faltan = video.duration - t;
+      if (faltan <= TOLERANCIA) desbloquear();
+      else restanteEl.textContent = 'Falta ' + reloj(faltan);
+    }
+  });
+
+  // El 'seeking' cubre teclado/controles nativos — el intento de salto
+  // se revierte al punto más lejano que realmente vio.
+  video.addEventListener('seeking', function(){
+    if (terminado) return;
+    if (video.currentTime > maxVisto + 1){
+      video.currentTime = maxVisto;
+    }
+  });
+
+  video.addEventListener('ended', desbloquear);
+  video.addEventListener('loadedmetadata', function(){
+    if (!terminado && video.duration) restanteEl.textContent = 'Falta ' + reloj(video.duration);
+    if (maxVisto > 0) video.currentTime = maxVisto;
+  });
+  window.addEventListener('pagehide', guardar);
+
+  btnCopiar.addEventListener('click', function(){
+    navigator.clipboard?.writeText(codigoTexto).then(function(){
+      btnCopiar.textContent = 'Copiado ✓';
+      btnCopiar.classList.add('copiado');
+      setTimeout(function(){
+        btnCopiar.textContent = 'Copiar código';
+        btnCopiar.classList.remove('copiado');
+      }, 2000);
+    });
+  });
+
+  pintarPlay();
+  if (terminado) desbloquear();
+})();
+</script>
+</body>
+</html>

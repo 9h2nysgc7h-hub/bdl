@@ -485,10 +485,25 @@ function renderPendienteAprobacion(){
       <div class="crest">${CRESTSVG}</div>
       <h1>Cuenta creada</h1>
       <p class="sub">Hola ${state.profile?.nombre || ''} — tu cuenta está pendiente de aprobación. Un admin la tiene que habilitar antes de que puedas ver el contenido.</p>
-      <button style="width:100%" id="pend-logout">Salir</button>
+      <p class="sub" style="margin-top:18px">¿Tenés un código de acceso?</p>
+      <input id="pend-codigo" placeholder="Código" style="text-transform:uppercase">
+      <p id="pend-codigo-error" style="color:#E08A6E;font-size:13px;display:none;margin:4px 0 0">Código inválido.</p>
+      <button style="width:100%;margin-top:10px" id="pend-canjear">Canjear código</button>
+      <button style="width:100%;margin-top:10px" id="pend-logout">Salir</button>
     </div>
   `);
   $('#pend-logout').onclick = () => sb.auth.signOut();
+  $('#pend-canjear').onclick = async () => {
+    const codigo = $('#pend-codigo').value.trim();
+    if (!codigo) return;
+    $('#pend-codigo-error').style.display = 'none';
+    const { data, error } = await sb.rpc('canjear_codigo_preview', { codigo });
+    if (error || !data) {
+      $('#pend-codigo-error').style.display = 'block';
+      return;
+    }
+    location.reload();
+  };
 }
 
 // ---------- dashboard ----------
