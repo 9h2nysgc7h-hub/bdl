@@ -241,10 +241,15 @@
       videoId: YT_VIDEO_ID,
       playerVars: {
         controls: 0, disablekb: 1, modestbranding: 1, rel: 0, fs: 0,
-        iv_load_policy: 3, playsinline: 1, origin: location.origin
+        iv_load_policy: 3, playsinline: 1, cc_load_policy: 0, origin: location.origin
       },
       events: {
         onReady: function(){
+          // cc_load_policy:0 no alcanza si el viewer tiene subtítulos
+          // activados por defecto en su cuenta de YouTube — esto los apaga
+          // sí o sí, para que no choquen con los subtítulos que ya quemamos
+          // en el video.
+          try { yt.unloadModule('captions'); } catch(e){}
           if (maxVisto > 0) yt.seekTo(maxVisto, true);
           setInterval(poll, 250);
         },
