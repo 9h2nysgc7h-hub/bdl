@@ -255,7 +255,13 @@
         },
         onStateChange: function(e){
           pintarPlay(e.data === 1);
-          if (e.data === 1) arrancado = true;
+          if (e.data === 1){
+            arrancado = true;
+            // YouTube a veces reactiva el módulo de subtítulos justo al
+            // arrancar la reproducción, aunque ya lo hayamos apagado en
+            // onReady — lo volvemos a apagar acá por las dudas.
+            try { yt.unloadModule('captions'); } catch(e){}
+          }
           if (e.data === 2) guardar();
           if (e.data === 0) desbloquear();
         }
